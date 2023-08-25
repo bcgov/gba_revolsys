@@ -155,11 +155,19 @@ public abstract class AbstractLoadingCodeTable extends AbstractCodeTable
     }
   }
 
+  /*
+   * for things like structured names we don't want to load all at once so we
+   * set this to false and set loadmissingcodes to true
+   */
   public AbstractLoadingCodeTable setLoadAll(final boolean loadAll) {
     this.loadAll = loadAll;
     return this;
   }
 
+  /*
+   * false to only load once (for static code tables), otherwise will query the
+   * database each time a code is not found
+   */
   @Override
   public AbstractLoadingCodeTable setLoadMissingCodes(final boolean loadMissingCodes) {
     this.loadMissingCodes = loadMissingCodes;
