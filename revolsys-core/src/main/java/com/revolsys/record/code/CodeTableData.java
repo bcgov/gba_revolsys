@@ -48,6 +48,10 @@ public class CodeTableData implements BaseCloseable, Cloneable {
     this.valueFieldLength = data.valueFieldLength;
   }
 
+  // puts all different permutations of lookup keys in the entry cache
+  // including id; normalized value, lowercase/uppercase values.
+  // The getEntry method looks up by what was placed in this cache (so
+  // you can lookup by id or values)
   protected synchronized CodeTableEntry addEntry(final Identifier id, final Object value) {
     synchronized (this.identifiers) {
       if (id instanceof Number) {
