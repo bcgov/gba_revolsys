@@ -39,6 +39,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 import javax.swing.event.CellEditorListener;
@@ -1333,41 +1334,49 @@ public class LayerRecordForm extends JPanel implements PropertyChangeListener, C
     }
   }
 
-  public void setFieldValue(final String fieldName, Object value, final boolean validate) {
-    final Object oldValue = getFieldValue(fieldName);
-    final RecordDefinition recordDefinition = getRecordDefinition();
-    if (recordDefinition != null) {
-      try {
-        final FieldDefinition field = recordDefinition.getField(fieldName);
-        if (field != null) {
-          value = field.toFieldValue(value);
+  public void setFieldValue(final String fieldName, final Object value, final boolean validate) {
+    Invoke.worker(new SwingWorker<Void, Void>() {
+      @Override
+      protected Void doInBackground() throws Exception {
+        Object newValue = value;
+        final Object oldValue = getFieldValue(fieldName);
+        final RecordDefinition recordDefinition = getRecordDefinition();
+        if (recordDefinition != null) {
+          try {
+            final FieldDefinition field = recordDefinition.getField(fieldName);
+            if (field != null) {
+              newValue = field.toFieldValue(newValue);
+            }
+          } catch (final Throwable e) {
+          }
         }
-      } catch (final Throwable e) {
-      }
-    }
-    this.fieldValues.put(fieldName, value);
-    final JComponent field = (JComponent)getField(fieldName);
+        LayerRecordForm.this.fieldValues.put(fieldName, newValue);
+        final JComponent field = (JComponent)getField(fieldName);
 
-    boolean changed = Property.isChanged(oldValue, value);
-    if (!changed) {
-      final Object recordValue = this.record.getValue(fieldName);
+        boolean changed = Property.isChanged(oldValue, newValue);
+        if (!changed) {
+          final Object recordValue = LayerRecordForm.this.record.getValue(fieldName);
 
-      if (Property.isChanged(oldValue, recordValue)) {
-        this.record.setValueByPath(fieldName, value);
-        changed = true;
-      }
-    }
-    SwingUtil.setFieldValue(field, value);
-    if (changed) {
-      if (validate) {
-        validateFields(fieldName);
-      } else {
-        final Set<String> fieldsToValidate = this.fieldsToValidate.get();
-        if (fieldsToValidate != null) {
-          fieldsToValidate.add(fieldName);
+          if (Property.isChanged(oldValue, recordValue)) {
+            LayerRecordForm.this.record.setValueByPath(fieldName, newValue);
+            changed = true;
+          }
         }
+        SwingUtil.setFieldValue(field, newValue);
+        if (changed) {
+          if (validate) {
+            validateFields(fieldName);
+          } else {
+            final Set<String> fieldsToValidate = LayerRecordForm.this.fieldsToValidate.get();
+            if (fieldsToValidate != null) {
+              fieldsToValidate.add(fieldName);
+            }
+          }
+        }
+        return null;
       }
-    }
+
+    });
   }
 
   public void setReadOnlyFieldNames(final Collection<String> readOnlyFieldNames) {

@@ -154,6 +154,24 @@ public interface CodeTable
 
   String getIdFieldName();
 
+  default void getMap(final Consumer<JsonObject> callback, final Identifier id) {
+    getValues(entry -> {
+      if (entry == null) {
+        callback.accept(JsonObject.EMPTY);
+      } else {
+        final JsonObject map = JsonObject.hash();
+        int i = 0;
+        for (final String name : getValueFieldNames()) {
+          final Object value = CodeTableEntry.getValues(entry).get(i);
+          map.addValue(name, value);
+          i++;
+        }
+        callback.accept(map);
+      }
+    }, id);
+
+  }
+
   default JsonObject getMap(final Identifier id) {
     final List<Object> values = getValues(id);
     if (values == null) {

@@ -18,6 +18,7 @@ import javax.swing.JMenuItem;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.SortOrder;
+import javax.swing.SwingWorker;
 
 import org.jeometry.common.data.type.DataType;
 
@@ -626,7 +627,14 @@ public class RecordLayerTableModel extends RecordRowTableModel
 
   @Override
   protected void setRecordValueDo(final Record record, final String fieldName, final Object value) {
-    this.layer.setRecordValue((LayerRecord)record, fieldName, value);
+    Invoke.worker(new SwingWorker<Void, Void>() {
+      @Override
+      protected Void doInBackground() throws Exception {
+        RecordLayerTableModel.this.layer.setRecordValue((LayerRecord)record, fieldName, value);
+        return null;
+      }
+    });
+
   }
 
   @Override
