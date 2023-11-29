@@ -52,6 +52,8 @@ public abstract class AbstractLoadingCodeTable extends AbstractCodeTable
 
   private final boolean loadingAll = false;
 
+  private boolean nullOnUiThread = false;
+
   public AbstractLoadingCodeTable() {
   }
 
@@ -78,12 +80,17 @@ public abstract class AbstractLoadingCodeTable extends AbstractCodeTable
     if (entry == null) {
       if (callback == null) {
         if (SwingUtilities.isEventDispatchThread()) {
-          Logs.error(this, "Cannot load from code table without callback in swing thread");
-        } else {
-          final var awaitCallback = new LatchCallback();
-          loadValue(idOrValue, awaitCallback);
-          entry = awaitCallback.getEntry();
+          if (this.nullOnUiThread) {
+            Logs.error(this, "Cannot load from code table without callback in swing thread");
+            Thread.dumpStack();
+            return null;
+          } else {
+            System.out.println("Cannot load from code table without callback in swing thread");
+          }
         }
+        final var awaitCallback = new LatchCallback();
+        loadValue(idOrValue, awaitCallback);
+        entry = awaitCallback.getEntry();
       } else {
         loadValue(idOrValue, callback);
       }
@@ -127,7 +134,7 @@ public abstract class AbstractLoadingCodeTable extends AbstractCodeTable
   private void loadValue(final Object value, final Consumer<CodeTableEntry> callback) {
     if (!isLoaded() && isLoadAll()) {
       if (callback != null) {
-        addLoadingCallback((data) -> {
+        addLoadingCallback(data -> {
           CodeTableEntry entry = null;
           if (data != null) {
             entry = data.getEntry(value);
@@ -151,10 +158,8 @@ public abstract class AbstractLoadingCodeTable extends AbstractCodeTable
       } finally {
         this.lock.unlock();
       }
-    } else {
-      if (callback != null) {
-        callback.accept(null);
-      }
+    } else if (callback != null) {
+      callback.accept(null);
     }
   }
 
@@ -205,6 +210,10 @@ public abstract class AbstractLoadingCodeTable extends AbstractCodeTable
     } finally {
       this.lock.unlock();
     }
+  }
+
+  protected void setFailOnUiThread(final boolean failOnUiThread) {
+    this.nullOnUiThread = failOnUiThread;
   }
 
   /*
