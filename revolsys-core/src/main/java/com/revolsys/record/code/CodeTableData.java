@@ -78,6 +78,9 @@ public class CodeTableData implements BaseCloseable, Cloneable {
     }
   }
 
+  public void clearCaches() {
+  }
+
   @Override
   public CodeTableData clone() {
     return new CodeTableData(this);
@@ -89,9 +92,13 @@ public class CodeTableData implements BaseCloseable, Cloneable {
     this.entryCache.clear();
   }
 
+  public AbstractCodeTable getCodeTable() {
+    return this.codeTable;
+  }
+
   public CodeTableEntry getEntry(final Object idOrValue) {
     if (idOrValue == null) {
-      return null;
+      return CodeTableEntry.EMPTY;
     }
     CodeTableEntry entry = this.entryCache.get(idOrValue);
     if (entry == null) {
@@ -108,7 +115,11 @@ public class CodeTableData implements BaseCloseable, Cloneable {
         }
       }
     }
-    return entry;
+    if (entry == null) {
+      return CodeTableEntry.EMPTY;
+    } else {
+      return entry;
+    }
   }
 
   public Identifier getIdentifier(final int index) {
