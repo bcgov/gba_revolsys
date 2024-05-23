@@ -845,7 +845,11 @@ public class LayerRecordForm extends JPanel implements PropertyChangeListener, C
         return (T)value;
       }
     } else {
-      final Identifier id = codeTable.getIdentifier(value);
+
+      final Identifier id = codeTable.getEntry(value)
+        .addCallback(e -> firePropertyChange(name, null, e))
+        .identifierOrDefault(null);
+
       return (T)id;
     }
   }
