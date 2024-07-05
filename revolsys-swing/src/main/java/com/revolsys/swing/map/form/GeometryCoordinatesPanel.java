@@ -46,6 +46,7 @@ public class GeometryCoordinatesPanel extends ValueField implements TableModelLi
     Property.addListener(this.model, form);
     this.model.setForm(form);
     this.table = new BaseJTable(this.model);
+    this.table.setEditable(form.getLayer().isEditable());
     this.table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     this.cellEditor = new BaseTableCellEditor(this.table);
     tableChanged(null);

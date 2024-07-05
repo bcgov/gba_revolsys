@@ -629,6 +629,7 @@ public class JdbcRecordWriter extends AbstractRecordWriter {
       }
       throw Exceptions.wrap("Unable to write\n" + record, e);
     } catch (final Exception e) {
+      Logs.error(this, "Unable to write", e);
       throw Exceptions.wrap("Unable to write\n" + record, e);
     }
   }
