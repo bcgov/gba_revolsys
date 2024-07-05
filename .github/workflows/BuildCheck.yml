@@ -45,7 +45,7 @@ jobs:
           ref: ${{env.OTHER_REF}}
           repository: ${{env.JEOMETRY_REPO}}
           path: jeometry
-          token: ${{secrets.PUSH_TOKEN}}
+          #token: ${{secrets.PUSH_TOKEN}}
 
       - name: Checkout revolsys
         uses: actions/checkout@v4
