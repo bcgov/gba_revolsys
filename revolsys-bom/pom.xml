@@ -124,16 +124,16 @@
         </exclusions>
       </dependency>
       <dependency>
-        <groupId>org.docx4j</groupId>
-        <artifactId>docx4j-ImportXHTML</artifactId>
-        <version>11.4.8</version>
-      </dependency>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j-ImportXHTML</artifactId>
+            <version>11.4.8</version>
+      </dependency>  
       <dependency>
-        <groupId>org.docx4j</groupId>
-        <artifactId>docx4j-JAXB-MOXy</artifactId>
-        <version>11.4.9</version>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j-JAXB-ReferenceImpl</artifactId>
+            <version>11.4.9</version>
       </dependency>
-      <dependency>
+	  <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
         <version>4.5.14</version>
