@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Types;
+import java.util.UUID;
 
 import org.jeometry.common.data.identifier.Identifier;
 import org.jeometry.common.data.identifier.TypedIdentifier;
@@ -32,6 +33,9 @@ public class JdbcFieldDefinitions {
 
   private static final JdbcDoubleFieldDefinition FIELD_DOUBLE = new JdbcDoubleFieldDefinition(
     UNKNOWN, UNKNOWN, Types.DOUBLE, false, null, null);
+
+  private static final JdbcUuidFieldDefinition FIELD_UUID = new JdbcUuidFieldDefinition(UNKNOWN,
+    UNKNOWN, Types.JAVA_OBJECT, false, null, null);
 
   private static final JdbcByteFieldDefinition FIELD_BYTE = new JdbcByteFieldDefinition(UNKNOWN,
     UNKNOWN, Types.TINYINT, false, null, null);
@@ -84,6 +88,8 @@ public class JdbcFieldDefinitions {
       return FIELD_TIMESTAMP;
     } else if (value instanceof Boolean) {
       return FIELD_BOOLEAN;
+    } else if (value instanceof UUID) {
+      return FIELD_UUID;
     } else {
       return FIELD_UNKNOWN;
     }
