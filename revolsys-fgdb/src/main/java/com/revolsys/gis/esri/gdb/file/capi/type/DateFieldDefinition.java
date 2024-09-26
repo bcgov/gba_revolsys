@@ -1,5 +1,8 @@
 package com.revolsys.gis.esri.gdb.file.capi.type;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import org.jeometry.common.data.type.DataTypes;
@@ -15,14 +18,14 @@ public class DateFieldDefinition extends AbstractFileGdbFieldDefinition {
   /** Synchronize access to C++ date methods across all instances. */
   private static final Object LOCK = new Object();
 
-  @SuppressWarnings("deprecation")
-  public static final Date MAX_DATE = new Date(138, 1, 19);
+  public static final Instant MAX_DATE = Instant
+    .from(ZonedDateTime.of(2038, 1, 19, 0, 0, 0, 0, ZoneOffset.UTC));
 
-  @SuppressWarnings("deprecation")
-  public static final Date MIN_DATE = new Date(70, 0, 1);
+  public static final Instant MIN_DATE = Instant
+    .from(ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC));
 
   public DateFieldDefinition(final int fieldNumber, final Field field) {
-    super(fieldNumber, field.getName(), DataTypes.SQL_DATE,
+    super(fieldNumber, field.getName(), DataTypes.INSTANT,
       Booleans.getBoolean(field.getRequired()) || !field.isIsNullable());
   }
 
@@ -58,34 +61,32 @@ public class DateFieldDefinition extends AbstractFileGdbFieldDefinition {
           throw new IllegalArgumentException("Data must be in the format YYYY-MM-DD " + value);
         }
       }
-      if (value instanceof Date) {
-        Date date = (Date)value;
-        if (date.before(MIN_DATE)) {
-          Logs.error(this, getName() + "=" + date + " is before " + MIN_DATE
-            + " which is not supported by ESRI File Geodatabases\n" + record);
-          if (isRequired()) {
-            date = MIN_DATE;
-          } else {
-            row.setNull(this.fieldNumber);
-          }
-        } else if (date.after(MAX_DATE)) {
-          Logs.error(this, getName() + "=" + date + " is after " + MAX_DATE
-            + " which is not supported by ESRI File Geodatabases\n" + record);
-          if (isRequired()) {
-            date = MAX_DATE;
-          } else {
-            row.setNull(this.fieldNumber);
-          }
+
+      Instant date = Dates.getInstant(value);
+
+      if (date.isBefore(MIN_DATE)) {
+        Logs.error(this, getName() + "=" + date + " is before " + MIN_DATE
+          + " which is not supported by ESRI File Geodatabases\n" + record);
+        if (isRequired()) {
+          date = MIN_DATE;
+        } else {
+          row.setNull(this.fieldNumber);
         }
-        final long time = date.getTime() / 1000;
-        synchronized (LOCK) {
-          synchronized (row) {
-            row.setDate(this.fieldNumber, time);
-          }
+      } else if (date.isAfter(MAX_DATE)) {
+        Logs.error(this, getName() + "=" + date + " is after " + MAX_DATE
+          + " which is not supported by ESRI File Geodatabases\n" + record);
+        if (isRequired()) {
+          date = MAX_DATE;
+        } else {
+          row.setNull(this.fieldNumber);
         }
-      } else {
-        throw new IllegalArgumentException(
-          "Expecting a java.util.Date not " + value.getClass() + " " + value);
+      }
+
+      final long time = date.getEpochSecond();
+      synchronized (LOCK) {
+        synchronized (row) {
+          row.setDate(this.fieldNumber, time);
+        }
       }
     }
   }
