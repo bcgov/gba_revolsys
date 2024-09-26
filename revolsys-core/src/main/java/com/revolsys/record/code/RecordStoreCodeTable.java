@@ -111,6 +111,17 @@ public class RecordStoreCodeTable extends AbstractLoadingCodeTable
     return clone;
   }
 
+  private void computeValueFieldDefinitions() {
+    if (this.recordDefinition == null) {
+      return;
+    }
+    final List<FieldDefinition> valueFields = new ArrayList<>();
+    for (final String fieldName : getValueFieldNames()) {
+      valueFields.add(this.recordDefinition.getField(fieldName));
+    }
+    setValueFieldDefinitions(valueFields);
+  }
+
   public void forEachRecord(final Consumer<Record> action) {
     final RecordStore recordStore = getRecordStore();
     if (recordStore != null) {
@@ -346,11 +357,7 @@ public class RecordStoreCodeTable extends AbstractLoadingCodeTable
           this.idFieldName = recordDefinition.getIdFieldName();
         }
         this.recordStore = this.recordDefinition.getRecordStore();
-        final List<FieldDefinition> valueFields = new ArrayList<>();
-        for (final String fieldName : getValueFieldNames()) {
-          valueFields.add(recordDefinition.getField(fieldName));
-        }
-        setValueFieldDefinitions(valueFields);
+        computeValueFieldDefinitions();
         setRecordDefinitionAfter(recordDefinition);
       }
     }
@@ -365,6 +372,7 @@ public class RecordStoreCodeTable extends AbstractLoadingCodeTable
 
   public RecordStoreCodeTable setValueFieldName(final String valueFieldName) {
     this.valueFieldNames = Arrays.asList(valueFieldName);
+    computeValueFieldDefinitions();
     if (this.orderBy == DEFAULT_FIELD_NAMES) {
       setOrderByFieldName(valueFieldName);
     }
@@ -373,6 +381,7 @@ public class RecordStoreCodeTable extends AbstractLoadingCodeTable
 
   public RecordStoreCodeTable setValueFieldNames(final List<String> valueColumns) {
     this.valueFieldNames = new ArrayList<>(valueColumns);
+    computeValueFieldDefinitions();
     if (this.orderBy == DEFAULT_FIELD_NAMES) {
       setOrderBy(valueColumns);
     }
