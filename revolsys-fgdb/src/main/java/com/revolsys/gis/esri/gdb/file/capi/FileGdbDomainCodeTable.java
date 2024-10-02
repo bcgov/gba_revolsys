@@ -24,6 +24,7 @@ public class FileGdbDomainCodeTable extends AbstractCodeTable {
   public FileGdbDomainCodeTable(final FileGdbRecordStore recordStore, final Domain domain) {
     this.domain = domain;
     this.name = domain.getDomainName();
+    setData(domain.getData());
   }
 
   @Override
