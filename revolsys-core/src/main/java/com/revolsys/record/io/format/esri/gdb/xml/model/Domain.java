@@ -12,6 +12,7 @@ import org.jeometry.common.compare.CompareUtil;
 import org.jeometry.common.data.identifier.Identifier;
 
 import com.revolsys.record.code.AbstractCodeTable;
+import com.revolsys.record.code.CodeTableData;
 import com.revolsys.record.io.format.esri.gdb.xml.model.enums.FieldType;
 import com.revolsys.record.io.format.esri.gdb.xml.model.enums.MergePolicyType;
 import com.revolsys.record.io.format.esri.gdb.xml.model.enums.SplitPolicyType;
@@ -101,6 +102,11 @@ public class Domain extends AbstractCodeTable {
 
   public List<CodedValue> getCodedValues() {
     return this.codedValues;
+  }
+
+  @Override
+  public CodeTableData getData() {
+    return super.getData();
   }
 
   public String getDescription() {
