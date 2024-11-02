@@ -19,10 +19,6 @@ public class AbstractCodeTable extends BaseObjectWithPropertiesAndChange
 
   protected CodeTableData data = newData();
 
-  protected CodeTableData newData() {
-    return new CodeTableData(this);
-  }
-
   private String name;
 
   protected final ReentrantLock lock = new ReentrantLock();
@@ -142,6 +138,10 @@ public class AbstractCodeTable extends BaseObjectWithPropertiesAndChange
     return true;
   }
 
+  protected CodeTableData newData() {
+    return new CodeTableData(this);
+  }
+
   public void setCaseSensitive(final boolean caseSensitive) {
     this.caseSensitive = caseSensitive;
   }
@@ -170,10 +170,12 @@ public class AbstractCodeTable extends BaseObjectWithPropertiesAndChange
   }
 
   @Override
-  public void withEntry(Consumer<CodeTableEntry> callback, Object idOrValue) {
-    final var entry = getEntry(callback, idOrValue);
-    if (entry.isEmpty()) {
+  public void withEntry(final Consumer<CodeTableEntry> callback, final Object idOrValue) {
+    final CodeTableEntry entry = getEntry(idOrValue);
+    if (entry.isLoaded()) {
       callback.accept(entry);
+    } else {
+      entry.addCallback(callback);
     }
   }
 
