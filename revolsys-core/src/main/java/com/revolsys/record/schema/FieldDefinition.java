@@ -876,7 +876,7 @@ public class FieldDefinition extends BaseObjectWithProperties implements CharSeq
             return null;
           }
         }
-        if (this.codeTable != null && this.isIdField()) {
+        if (this.codeTable != null) {
           final Identifier identifier = this.codeTable.getIdentifier(value);
           if (identifier != null) {
             value = identifier.toSingleValue();
