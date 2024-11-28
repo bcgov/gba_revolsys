@@ -662,6 +662,7 @@ public class FieldDefinition extends BaseObjectWithProperties implements CharSeq
 
   protected void postClone(final FieldDefinition clone) {
     clone.generated = this.generated;
+    clone.title = this.title;
   }
 
   public FieldDefinition setAllowedValues(final Collection<?> allowedValues) {
