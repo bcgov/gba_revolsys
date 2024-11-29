@@ -72,6 +72,12 @@ public class CodeTableComboBoxModel extends AbstractListModel<Identifier>
     this.codeTable = codeTable;
     this.allowNull = allowNull;
     Property.addListener(codeTable, "valuesChanged", this);
+
+    if (!this.codeTable.isLoaded() && !this.codeTable.isLoading()) {
+      // force code table load
+      // https://apps.nrs.gov.bc.ca/geobcjira/browse/GBAAP-411
+      Invoke.background(null, () -> this.codeTable.refresh());
+    }
   }
 
   @Override
