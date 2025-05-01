@@ -36,7 +36,6 @@ import com.revolsys.io.BaseCloseable;
 import com.revolsys.io.FileUtil;
 import com.revolsys.io.Writer;
 import com.revolsys.jdbc.JdbcUtils;
-import com.revolsys.parallel.SingleThreadExecutor;
 import com.revolsys.record.Record;
 import com.revolsys.record.code.CodeTable;
 import com.revolsys.record.io.format.esri.gdb.xml.model.DEFeatureClass;
@@ -76,12 +75,6 @@ public class FileGdbRecordStore extends AbstractRecordStore {
   private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\?");
 
   private static IntHashMap<String> WKT_BY_ID = new IntHashMap<>();
-
-  private static final SingleThreadExecutor TASK_EXECUTOR;
-  static {
-    TASK_EXECUTOR = new SingleThreadExecutor("ESRI FGDB Create Thread", new FgdbApiInit());
-    TASK_EXECUTOR.waitForRunning();
-  }
 
   public static SpatialReference getSpatialReference(final GeometryFactory geometryFactory) {
     if (geometryFactory != null) {
@@ -846,20 +839,26 @@ public class FileGdbRecordStore extends AbstractRecordStore {
   }
 
   // TODO deadlocks!!!!!!!!
+  // EG: I have attempted to resolve the deadlock issue
+  // by moving the synchronized block to exclude the writer. The
+  // writer acquires a table lock to ensure two threads
+  // are not writing to the same table
   public FileGdbWriter newRecordWriter(final RecordDefinitionProxy recordDefinition,
     final boolean loadOnlyMode) {
     final GeodatabaseReference geodatabase = this.geodatabase;
     if (geodatabase != null) {
+
+      FileGdbRecordDefinition fileGdbRecordDefinition = null;
       synchronized (geodatabase) {
         try (
           BaseCloseable connection = geodatabase.connect()) {
-          final FileGdbRecordDefinition fileGdbRecordDefinition = getRecordDefinition(
-            recordDefinition);
-          if (fileGdbRecordDefinition != null) {
-            return new FileGdbWriter(this, recordDefinition, fileGdbRecordDefinition, loadOnlyMode);
-          }
+          fileGdbRecordDefinition = getRecordDefinition(recordDefinition);
         }
       }
+      if (fileGdbRecordDefinition != null) {
+        return new FileGdbWriter(this, recordDefinition, fileGdbRecordDefinition, loadOnlyMode);
+      }
+
     }
     return null;
   }
