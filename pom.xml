@@ -464,6 +464,18 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
+    
+    <repository>
+      <id>revolsys-libs-rr</id>
+      <name>Revolsys Libs Updated</name>
+      <url>https://raw.githubusercontent.com/refractions-research/mvnrepository/main/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
 <!--
     <repository>
       <id>github-jeometry</id>
