@@ -63,6 +63,7 @@ import com.revolsys.geometry.index.SpatialIndex;
 import com.revolsys.geometry.index.rstartree.RStarTree;
 import com.revolsys.geometry.io.GeometryReader;
 import com.revolsys.geometry.model.BoundingBox;
+import com.revolsys.geometry.model.End;
 import com.revolsys.geometry.model.Geometry;
 import com.revolsys.geometry.model.GeometryDataTypes;
 import com.revolsys.geometry.model.GeometryFactory;
@@ -3488,10 +3489,26 @@ public abstract class AbstractRecordLayer extends AbstractLayer implements
     if (geometry instanceof LineString) {
       final LineString line = (LineString)geometry;
       final List<LineString> lines = line.split(point);
+
       if (lines.size() == 2) {
         final LineString line1 = lines.get(0);
         final LineString line2 = lines.get(1);
-        return splitRecord(record, line, point, line1, line2);
+
+        // "point" here maybe be more precise than the lines
+        // line coordinate = (1112874.388, 482445.265)
+        // point coordinate = (1112874.388488347 482445.2654114751)
+        // this causes a problem with resetting the directional fields
+        // later in the process; so here we get the same point as the line
+        // and use that as the split vertex
+        // see issue: 482
+        Point splitvertex = point;
+        if (line1.distanceVertex(End.FROM, point) < line1.distanceVertex(End.TO, point)) {
+          splitvertex = line1.getFromPoint();
+        } else {
+          splitvertex = line1.getToPoint();
+        }
+
+        return splitRecord(record, line, splitvertex, line1, line2);
       } else {
         return Collections.singletonList(record);
       }
