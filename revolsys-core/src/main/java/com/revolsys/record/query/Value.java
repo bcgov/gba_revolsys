@@ -59,7 +59,11 @@ public class Value implements QueryValue {
   }
 
   public static Value newValue(final Object value) {
-    return newValue(JdbcFieldDefinitions.newFieldDefinition(value), value);
+    return newValue(value, false);
+  }
+
+  public static Value newValue(final Object value, final boolean dontConvert) {
+    return newValue(JdbcFieldDefinitions.newFieldDefinition(value), value, dontConvert);
   }
 
   private ColumnReference column;
