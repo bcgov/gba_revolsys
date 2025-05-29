@@ -21,7 +21,8 @@ public class RegexpReplace extends SimpleFunction {
 
   public RegexpReplace(final QueryValue value, final String pattern, final String replace,
     final String flags) {
-    super(NAME, value, Value.newValue(pattern), Value.newValue(replace), Value.newValue(flags));
+    super(NAME, value, Value.newValue(pattern), Value.newValue(replace, true),
+      Value.newValue(flags));
   }
 
   @SuppressWarnings("unchecked")
