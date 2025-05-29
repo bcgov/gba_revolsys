@@ -128,14 +128,17 @@ public class MergeRecordsDialog extends BaseDialog {
             MergeRecordsDialog.this.layer.fireRecordsChanged();
           }
         });
-        final MergeCreateRecordUndo createRecordUndo = new MergeCreateRecordUndo(this.layer,
-          mergeableRecord);
-        multipleUndo.addEdit(createRecordUndo);
+
         for (final MergeOriginalRecord originalRecord : mergeableRecord.originalRecords) {
           final DeleteLayerRecordUndo deleteRecordUndo = new DeleteLayerRecordUndo(
             originalRecord.originalRecord);
           multipleUndo.addEdit(deleteRecordUndo);
         }
+
+        final MergeCreateRecordUndo createRecordUndo = new MergeCreateRecordUndo(this.layer,
+          mergeableRecord);
+        multipleUndo.addEdit(createRecordUndo);
+
         multipleUndo.addEdit(new AbstractUndoableEdit() {
           /**
            *
