@@ -771,6 +771,17 @@ public class Query extends BaseObjectWithProperties
     }
   }
 
+  @Override
+  public boolean isCancelled() {
+    if (super.isCancelled()) {
+      return true;
+    }
+    if (this.cancellable != null && this.cancellable.isCancelled()) {
+      return true;
+    }
+    return false;
+  }
+
   public boolean isCustomResult() {
     if (!getJoins().isEmpty()) {
       return true;
@@ -1081,11 +1092,11 @@ public class Query extends BaseObjectWithProperties
   }
 
   public Query selectAll() {
-    RecordDefinition recordDefinition = getRecordDefinition();
+    final RecordDefinition recordDefinition = getRecordDefinition();
     return selectAll(recordDefinition);
   }
 
-  public Query selectAll(RecordDefinition recordDefinition) {
+  public Query selectAll(final RecordDefinition recordDefinition) {
     return select(recordDefinition.getFieldDefinitions());
   }
 

@@ -217,6 +217,9 @@ public class RecordStoreLayer extends AbstractRecordLayer {
           transaction.setRollbackOnly();
           final LabelCountMap labelCountMap = query.getProperty("statistics");
           for (final LayerRecord record : reader.<LayerRecord> i()) {
+            if (query.isCancelled()) {
+              return;
+            }
             final Identifier identifier = record.getIdentifier();
             R proxyRecord = null;
             if (identifier == null) {

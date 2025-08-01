@@ -552,11 +552,10 @@ public abstract class RecordRowTableModel extends AbstractRecordTableModel
   }
 
   @Override
-  public String toCopyValue(final int rowIndex, int fieldIndex, final Object recordValue) {
+  public String toCopyValue(final int rowIndex, final int fieldIndex, final Object recordValue) {
     if (fieldIndex < this.fieldsOffset) {
       return DataTypes.toString(recordValue);
     } else {
-      fieldIndex -= this.fieldsOffset;
       String text;
       final RecordDefinition recordDefinition = getRecordDefinition();
       final String fieldName = getColumnFieldName(fieldIndex);
