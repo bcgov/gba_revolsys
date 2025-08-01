@@ -195,13 +195,24 @@ public class RecordLayerTableModel extends RecordRowTableModel
 
   public void forEachColumnValue(final Cancellable cancellable, final int columnIndex,
     final Consumer<Object> action) {
-    final FieldDefinition field = getColumnFieldDefinition(columnIndex);
+    // final FieldDefinition field = getColumnFieldDefinition(columnIndex);
     final String fieldName = getColumnFieldName(columnIndex);
     final TableRecordsMode tableRecordsMode = getTableRecordsMode();
     if (tableRecordsMode != null && fieldName != null) {
       final Query query = getFilterQuery().clone();
-      addIdFieldNames(query);
-      query.select(field);
+
+      // EG: issue 492 (copy values from the TL table in the UI)
+      // What I think was happening here is this was trying to load only the
+      // tl_id and fieldname
+      // but the underlying code wants to load the entire TL record into the
+      // layer and cache it
+      // but it couldn't do this properly because the query told it to only load
+      // two attributes.
+      // The simplest fix appears to be to just tell it to load everything and
+      // not be smart.
+      //
+      // addIdFieldNames(query);
+      // query.select(field);
       try (
         BaseCloseable eventsDisabled = this.layer.eventsDisabled()) {
         query.setCancellable(cancellable);
