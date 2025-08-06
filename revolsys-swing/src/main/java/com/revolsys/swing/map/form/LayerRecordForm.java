@@ -1321,7 +1321,7 @@ public class LayerRecordForm extends JPanel implements PropertyChangeListener, C
         originalString = DataTypes.toString(originalValue);
       }
       field.setFieldToolTip(originalString);
-      field.setFieldBackgroundColor(new Color(0, 255, 0, 31));
+      field.setFieldBackgroundColor(new Color(211, 242, 211));
     } else {
       field.setFieldToolTip("");
     }
