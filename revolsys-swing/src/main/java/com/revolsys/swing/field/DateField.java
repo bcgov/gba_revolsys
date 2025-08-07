@@ -79,7 +79,7 @@ public class DateField extends JXDatePicker implements Field, PropertyChangeList
   @Override
   public void setFieldForegroundColor(Color color) {
     if (color == null) {
-      color = Field.DEFAULT_BACKGROUND;
+      color = Field.DEFAULT_FOREGROUND;
     }
     final JFormattedTextField editor = getEditor();
     editor.setForeground(color);
