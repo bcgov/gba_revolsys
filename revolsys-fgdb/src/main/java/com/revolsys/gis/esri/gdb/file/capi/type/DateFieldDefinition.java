@@ -71,6 +71,7 @@ public class DateFieldDefinition extends AbstractFileGdbFieldDefinition {
           date = MIN_DATE;
         } else {
           row.setNull(this.fieldNumber);
+          return;
         }
       } else if (date.isAfter(MAX_DATE)) {
         Logs.error(this, getName() + "=" + date + " is after " + MAX_DATE
@@ -79,6 +80,7 @@ public class DateFieldDefinition extends AbstractFileGdbFieldDefinition {
           date = MAX_DATE;
         } else {
           row.setNull(this.fieldNumber);
+          return;
         }
       }
 
