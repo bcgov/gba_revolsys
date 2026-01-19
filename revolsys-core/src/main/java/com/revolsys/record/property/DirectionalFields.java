@@ -136,8 +136,14 @@ public class DirectionalFields extends AbstractRecordDefinitionProperty {
 
   public static void setSwapFieldValues(final Record record, final MapEx newValues,
     final String fieldName1, final String fieldName2) {
-    newValues.addFieldValue(fieldName1, record, fieldName2)
-      .addFieldValue(fieldName2, record, fieldName1);
+
+    newValues.add(fieldName1, record.get(fieldName2)) //
+      .add(fieldName2, record.get(fieldName1));
+
+    // this doesn't add null values to the map and
+    // later we need the map keys so this doesn't work
+    // newValues.addFieldValue(fieldName1, record, fieldName2)
+    // .addFieldValue(fieldName2, record, fieldName1);
   }
 
   private final Map<String, Map<Object, Object>> directionalFieldValues = new HashMap<>();
