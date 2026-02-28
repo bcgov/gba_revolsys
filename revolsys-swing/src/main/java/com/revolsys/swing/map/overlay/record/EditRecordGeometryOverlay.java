@@ -48,6 +48,7 @@ import com.revolsys.geometry.model.Punctual;
 import com.revolsys.geometry.model.editor.GeometryEditor;
 import com.revolsys.geometry.model.segment.LineSegment;
 import com.revolsys.geometry.model.vertex.Vertex;
+import com.revolsys.geometry.simplify.DouglasPeuckerSimplifier;
 import com.revolsys.record.schema.FieldDefinition;
 import com.revolsys.record.schema.RecordDefinition;
 import com.revolsys.swing.Dialogs;
@@ -75,7 +76,6 @@ import com.revolsys.swing.map.overlay.VertexStyleRenderer;
 import com.revolsys.swing.map.overlay.ZoomOverlay;
 import com.revolsys.swing.map.overlay.record.geometryeditor.AppendVertexUndoEdit;
 import com.revolsys.swing.map.overlay.record.geometryeditor.DeleteVertexUndoEdit;
-import com.revolsys.swing.map.overlay.record.geometryeditor.GeneralizeVerticesGeometryUndoEdit;
 import com.revolsys.swing.map.overlay.record.geometryeditor.InsertVertexUndoEdit;
 import com.revolsys.swing.map.overlay.record.geometryeditor.MoveGeometryUndoEdit;
 import com.revolsys.swing.map.overlay.record.geometryeditor.SetVertexUndoEdit;
@@ -408,8 +408,16 @@ public class EditRecordGeometryOverlay extends AbstractOverlay
           final double distanceTolerance = tolerance.getValue().doubleValue();
           final MultipleUndo edits = new MultipleUndo();
           for (final LayerRecord record : records) {
-            final GeneralizeVerticesGeometryUndoEdit edit = new GeneralizeVerticesGeometryUndoEdit(
-              record, distanceTolerance);
+
+            final Geometry oldValue = record.getGeometry();
+            final Geometry newValue = DouglasPeuckerSimplifier.simplify(oldValue, distanceTolerance,
+              true);
+
+            // must use layer.newSetFieldUndo to ensure
+            // you get the undoable command then properly maintains
+            // the history records
+            final UndoableEdit edit = layer.newSetFieldUndo(record,
+              record.getRecordDefinition().getGeometryFieldName(), oldValue, newValue);
             edits.addEdit(edit);
           }
           edits.addEdit(new ClearXorUndoEdit());
