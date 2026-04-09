@@ -587,12 +587,13 @@ public abstract class AbstractRecordLayer extends AbstractLayer implements
         } else {
           addRecordShowTable(parameters);
         }
+
+      } else {
+        Dialogs.showMessageDialog(
+          "Adding records is not enabled for the " + getPath()
+            + " layer. If possible make the layer editable",
+          "Cannot Add Record", JOptionPane.ERROR_MESSAGE);
       }
-    } else {
-      Dialogs.showMessageDialog(
-        "Adding records is not enabled for the " + getPath()
-          + " layer. If possible make the layer editable",
-        "Cannot Add Record", JOptionPane.ERROR_MESSAGE);
     }
   }
 
