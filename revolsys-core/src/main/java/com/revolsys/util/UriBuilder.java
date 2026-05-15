@@ -13,13 +13,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.conn.util.InetAddressUtils;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.message.ParserCursor;
-import org.apache.http.message.TokenParser;
-import org.apache.http.util.CharArrayBuffer;
-import org.apache.http.util.TextUtils;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.http.message.ParserCursor;
+import org.apache.hc.core5.net.InetAddressUtils;
+import org.apache.hc.core5.util.CharArrayBuffer;
+import org.apache.hc.core5.util.TextUtils;
+import org.apache.hc.core5.util.Tokenizer;
 
 /**
  * Builder for {@link URI} instances.
@@ -331,7 +331,7 @@ public class UriBuilder {
           appendUrlEncode(sb, this.userInfo, USERINFO, false);
           sb.append("@");
         }
-        if (InetAddressUtils.isIPv6Address(this.host)) {
+        if (InetAddressUtils.isIPv6(this.host)) {
           sb.append("[").append(this.host).append("]");
         } else {
           sb.append(this.host);
@@ -510,22 +510,21 @@ public class UriBuilder {
     if (query != null && !query.isEmpty()) {
       final CharArrayBuffer buffer = new CharArrayBuffer(query.length());
       buffer.append(query);
-      final TokenParser tokenParser = TokenParser.INSTANCE;
-      final BitSet delimSet = new BitSet();
-      delimSet.set(';');
-      delimSet.set('&');
+      final Tokenizer tokenParser = Tokenizer.INSTANCE;
+
+      final Tokenizer.Delimiter valueDelm = Tokenizer.delimiters(';', '&');
+      final Tokenizer.Delimiter nameDelm = Tokenizer.delimiters(';', '&', '=');
+
       final ParserCursor cursor = new ParserCursor(0, buffer.length());
       final List<NameValuePair> list = new ArrayList<>();
       while (!cursor.atEnd()) {
-        delimSet.set('=');
-        final String name = tokenParser.parseToken(buffer, cursor, delimSet);
+        final String name = tokenParser.parseToken(buffer, cursor, nameDelm);
         String value = null;
         if (!cursor.atEnd()) {
           final int delim = buffer.charAt(cursor.getPos());
           cursor.updatePos(cursor.getPos() + 1);
           if (delim == '=') {
-            delimSet.clear('=');
-            value = tokenParser.parseToken(buffer, cursor, delimSet);
+            value = tokenParser.parseToken(buffer, cursor, valueDelm);
             if (!cursor.atEnd()) {
               cursor.updatePos(cursor.getPos() + 1);
             }

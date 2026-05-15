@@ -12,7 +12,6 @@ import org.jeometry.common.logging.Logs;
 
 import com.revolsys.swing.dnd.transferable.ObjectTransferable;
 
-@SuppressWarnings("serial")
 public class TreePathListTransferHandler extends TransferHandler {
   /**
    *
@@ -59,7 +58,7 @@ public class TreePathListTransferHandler extends TransferHandler {
   protected Transferable createTransferable(final JComponent c) {
     if (c instanceof JList) {
       final JList list = (JList)c;
-      final Object[] selectedPaths = list.getSelectedValues();
+      final Object[] selectedPaths = list.getSelectedValuesList().toArray();
       return new ObjectTransferable<>(list, selectedPaths);
     } else {
       return null;

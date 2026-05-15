@@ -1,6 +1,6 @@
 package com.revolsys.net.oauth;
 
-import com.revolsys.net.http.ApacheHttpException;
+import com.revolsys.net.http.apache5.ApacheHttpException;
 import com.revolsys.record.io.format.json.JsonObject;
 import com.revolsys.record.io.format.json.JsonParser;
 

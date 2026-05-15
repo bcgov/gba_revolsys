@@ -13,11 +13,9 @@ import javax.sql.DataSource;
 
 import org.postgresql.Driver;
 import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.dao.CannotSerializeTransactionException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.BadSqlGrammarException;
 
@@ -59,9 +57,6 @@ public class PostgreSQL extends AbstractJdbcDatabaseFactory {
 
     addSqlStateExceptionMessageFactories(CannotAcquireLockException::new, "55P03");
 
-    addSqlStateExceptionMessageFactories(CannotSerializeTransactionException::new, "40001");
-
-    addSqlStateExceptionMessageFactories(DeadlockLoserDataAccessException::new, "40P01");
   }
 
   @Override

@@ -80,7 +80,7 @@ public class PasswordField extends JPasswordField implements Field, FocusListene
 
   @Override
   public void focusLost(final FocusEvent e) {
-    final String text = getText();
+    final String text = new String(getPassword());
     setFieldValue(text);
   }
 
@@ -111,7 +111,7 @@ public class PasswordField extends JPasswordField implements Field, FocusListene
   @SuppressWarnings("unchecked")
   @Override
   public <T> T getFieldValue() {
-    final String text = getText();
+    final String text = new String(getPassword());
     return (T)text;
   }
 
@@ -161,7 +161,7 @@ public class PasswordField extends JPasswordField implements Field, FocusListene
   @Override
   public boolean setFieldValue(final Object value) {
     final String newText = getDisplayText(value);
-    final String text = getText();
+    final String text = new String(getPassword());
     this.fieldSupport.discardAllEdits();
     if (!DataType.equal(text, newText)) {
       if (newText == null) {
@@ -203,6 +203,6 @@ public class PasswordField extends JPasswordField implements Field, FocusListene
 
   @Override
   public void updateFieldValue() {
-    setFieldValue(getText());
+    setFieldValue(new String(getPassword()));
   }
 }

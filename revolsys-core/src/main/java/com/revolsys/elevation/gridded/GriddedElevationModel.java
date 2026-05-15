@@ -406,7 +406,6 @@ public interface GriddedElevationModel extends Grid {
     }
   }
 
-  @SuppressWarnings("unchecked")
   default <G extends Geometry> G setGeometryElevations(final G geometry) {
     return setGeometryElevations(geometry, this::getValue);
   }

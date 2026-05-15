@@ -1,6 +1,7 @@
 package com.revolsys.web.security.oauth;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.security.Principal;
 import java.util.function.Function;
 
@@ -8,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import org.apache.http.client.methods.RequestBuilder;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.jeometry.common.logging.Logs;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -91,9 +92,9 @@ public class MicrosoftOAuthHandler {
 
   public String getRedirectUri(final String redirectUri, final String state, final String nonce,
     final String scope) {
-    final RequestBuilder urlBuilder = this.oauthClient.authorizationUrlBuilder(scope, redirectUri,
-      state, nonce, this.prompt);
-    return urlBuilder.build().getURI().toASCIIString();
+    final ClassicRequestBuilder urlBuilder = this.oauthClient.authorizationUrlBuilder(scope,
+      redirectUri, state, nonce, this.prompt);
+    return urlBuilder.build().getRequestUri();
   }
 
   public String getState(final HttpServletRequest request) {
@@ -144,7 +145,7 @@ public class MicrosoftOAuthHandler {
   }
 
   public void signOff(final HttpServletRequest request, final HttpServletResponse response)
-    throws IOException {
+    throws IOException, URISyntaxException {
     request.getSession().invalidate();
     final String serverUrl = HttpServletUtils.getServerUrl(request);
     final String redirectUrl = this.oauthClient.endSessionUrl(serverUrl).toASCIIString();

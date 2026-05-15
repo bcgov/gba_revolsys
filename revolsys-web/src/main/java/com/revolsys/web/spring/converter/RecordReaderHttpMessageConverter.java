@@ -73,7 +73,8 @@ public class RecordReaderHttpMessageConverter extends AbstractHttpMessageConvert
       final RecordReaderFactory readerFactory = IoFactory
         .factoryByMediaType(RecordReaderFactory.class, mediaTypeString);
       if (readerFactory == null) {
-        throw new HttpMessageNotReadableException("Cannot read data in format" + mediaType);
+        throw new HttpMessageNotReadableException("Cannot read data in format" + mediaType,
+          inputMessage);
       } else {
         final RecordReader reader = readerFactory
           .newRecordReader(new InputStreamResource("recordInput", body));
@@ -89,7 +90,7 @@ public class RecordReaderHttpMessageConverter extends AbstractHttpMessageConvert
         return reader;
       }
     } catch (final IOException e) {
-      throw new HttpMessageNotReadableException("Error reading data", e);
+      throw new HttpMessageNotReadableException("Error reading data", e, inputMessage);
     }
   }
 

@@ -22,8 +22,6 @@ import com.revolsys.swing.menu.MenuFactory;
 public class BackgroundTaskTabLabel extends JPanel implements MouseListener, TableModelListener {
   private static final long serialVersionUID = 1L;
 
-  private static final Icon ANIMATED = Icons.getAnimatedIcon("error_animated.gif");
-
   static final Icon STATIC = Icons.getIcon("time");
 
   private final JTabbedPane tabs;

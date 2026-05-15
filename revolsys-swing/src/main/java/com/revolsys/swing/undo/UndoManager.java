@@ -1,7 +1,7 @@
 package com.revolsys.swing.undo;
 
 import java.awt.Component;
-import java.awt.Event;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.ActionMap;
@@ -75,9 +75,9 @@ public class UndoManager extends javax.swing.undo.UndoManager
 
       int modifiers;
       if (OS.isMac()) {
-        modifiers = Event.META_MASK;
+        modifiers = InputEvent.META_DOWN_MASK;
       } else {
-        modifiers = Event.CTRL_MASK;
+        modifiers = InputEvent.CTRL_DOWN_MASK;
       }
       final KeyStroke undoKey = KeyStroke.getKeyStroke(KeyEvent.VK_Z, modifiers);
       final RunnableAction undoAction = new RunnableAction("Undo", this::undo);

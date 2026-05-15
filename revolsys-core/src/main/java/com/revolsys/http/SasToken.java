@@ -5,8 +5,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.net.WWWFormCodec;
 
 public class SasToken {
 
@@ -18,7 +18,7 @@ public class SasToken {
     if (token.startsWith("?")) {
       token = token.substring(1);
     }
-    this.params = URLEncodedUtils.parse(token, StandardCharsets.UTF_8);
+    this.params = WWWFormCodec.parse(token, StandardCharsets.UTF_8);
     for (final NameValuePair param : this.params) {
       if (param.getName().equals("se")) {
         final String expiryString = param.getValue();

@@ -3,15 +3,12 @@ package com.revolsys.raster.io.format.tiff.image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.imaging.ImageReadException;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
 import org.apache.commons.imaging.common.ImageMetadata.ImageMetadataItem;
-import org.apache.commons.imaging.common.bytesource.ByteSource;
-import org.apache.commons.imaging.common.bytesource.ByteSourceFile;
-import org.apache.commons.imaging.common.bytesource.ByteSourceInputStream;
 import org.apache.commons.imaging.formats.tiff.TiffField;
 import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
 import org.apache.commons.imaging.formats.tiff.TiffImageMetadata.TiffMetadataItem;
@@ -54,7 +51,7 @@ public class TiffCommonsImagingImage extends AbstractGeoreferencedImage
   }
 
   private double getDouble(final TiffImageMetadata metaData, final int tag,
-    final double defaultValue) throws ImageReadException {
+    final double defaultValue) throws ImagingException {
     final TiffField field = getTiffField(metaData, tag);
     if (field == null) {
       return defaultValue;
@@ -64,7 +61,7 @@ public class TiffCommonsImagingImage extends AbstractGeoreferencedImage
   }
 
   private Map<GeoTiffKey, Object> getGeoKeys(final TiffImageMetadata metaData)
-    throws ImageReadException {
+    throws ImagingException {
     final Map<GeoTiffKey, Object> geoKeys = new LinkedHashMap<>();
 
     final TiffField keysField = metaData
@@ -134,7 +131,7 @@ public class TiffCommonsImagingImage extends AbstractGeoreferencedImage
   }
 
   @SuppressWarnings("unused")
-  private boolean loadGeoTiffMetaData(final TiffImageMetadata metaData) throws ImageReadException {
+  private boolean loadGeoTiffMetaData(final TiffImageMetadata metaData) throws ImagingException {
     try {
       final int xResolution = (int)getDouble(metaData, TAG_X_RESOLUTION, 1);
       final int yResolution = (int)getDouble(metaData, TAG_Y_RESOLUTION, 1);
@@ -205,33 +202,32 @@ public class TiffCommonsImagingImage extends AbstractGeoreferencedImage
       final TiffImageParser imageParser = new TiffImageParser();
       final TiffImageMetadata metaData = (TiffImageMetadata)imageParser.getMetadata(byteSource);
       loadGeoTiffMetaData(metaData);
-    } catch (ImageReadException | IOException e) {
+    } catch (final IOException e) {
       throw Exceptions.wrap("Unable to open:" + getImageResource(), e);
     }
 
   }
 
-  private ByteSource newByteSource() {
+  private ByteSource newByteSource() throws IOException {
     ByteSource byteSource;
     final Resource imageResource = getImageResource();
     if (imageResource.isFile()) {
-      byteSource = new ByteSourceFile(imageResource.getFile());
+      byteSource = ByteSource.file(imageResource.getFile());
     } else {
       final String filename = imageResource.getFilename();
       final InputStream in = imageResource.getInputStream();
-      byteSource = new ByteSourceInputStream(in, filename);
+      byteSource = ByteSource.inputStream(in, filename);
     }
     return byteSource;
   }
 
   private void readImage() {
-    final Map<String, Object> params = Collections.emptyMap();
     try {
       final ByteSource byteSource = newByteSource();
       final TiffImageParser imageParser = new TiffImageParser();
-      final BufferedImage bufferedImage = imageParser.getBufferedImage(byteSource, params);
+      final BufferedImage bufferedImage = imageParser.getBufferedImage(byteSource, null);
       setRenderedImage(bufferedImage);
-    } catch (ImageReadException | IOException e) {
+    } catch (final IOException e) {
       throw Exceptions.wrap("Unable to open:" + getImageResource(), e);
     }
   }

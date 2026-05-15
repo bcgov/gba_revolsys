@@ -1,6 +1,6 @@
 package com.revolsys.http;
 
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
 
 public class BearerTokenRequestBuilder extends ApacheHttpRequestBuilder {
 

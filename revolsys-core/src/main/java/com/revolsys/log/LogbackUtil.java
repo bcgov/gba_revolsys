@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.PatternLayout;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
@@ -48,11 +48,11 @@ public class LogbackUtil {
     final String pattern) {
     final LoggerContext context = logger.getLoggerContext();
 
-    final PatternLayout layout = newLayout(context, pattern);
+    final PatternLayoutEncoder encoder = newLayout(context, pattern);
 
     final ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
     appender.setContext(context);
-    appender.setLayout(layout);
+    appender.setEncoder(encoder);
     appender.start();
 
     logger.addAppender(appender);
@@ -62,7 +62,7 @@ public class LogbackUtil {
   public static FileAppender<ILoggingEvent> addFileAppender(final String name, final Logger logger,
     final File logFile, final String pattern, final boolean append) {
     final LoggerContext context = logger.getLoggerContext();
-    final PatternLayout layout = newLayout(context, pattern);
+    final PatternLayoutEncoder layout = newLayout(context, pattern);
 
     final FileAppender<ILoggingEvent> appender = new FileAppender<>();
     appender.setContext(context);
@@ -71,7 +71,7 @@ public class LogbackUtil {
     appender.setImmediateFlush(true);
     final String absolutePath = logFile.getAbsolutePath();
     appender.setFile(absolutePath);
-    appender.setLayout(layout);
+    appender.setEncoder(layout);
     appender.start();
     logger.addAppender(appender);
     return appender;
@@ -107,6 +107,7 @@ public class LogbackUtil {
       event.setLoggerName(category);
       event.setLevel(Level.INFO);
       event.setMessage(message.toString());
+      event.setLoggerContext(logger.getLoggerContext());
       appender.doAppend(event);
     }
     return appender;
@@ -136,12 +137,12 @@ public class LogbackUtil {
     return (Logger)LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
   }
 
-  public static PatternLayout newLayout(final LoggerContext context, final String pattern) {
-    final PatternLayout layout = new PatternLayout();
-    layout.setContext(context);
-    layout.setPattern(pattern);
-    layout.start();
-    return layout;
+  public static PatternLayoutEncoder newLayout(final LoggerContext context, final String pattern) {
+    final PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+    encoder.setContext(context);
+    encoder.setPattern(pattern);
+    encoder.start();
+    return encoder;
   }
 
   public static void removeAllAppenders() {

@@ -4,12 +4,12 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.ProtocolVersion;
 
 public interface ApacheRequestBuilderProxy {
   default ApacheRequestBuilderProxy addHeader(final Header header) {

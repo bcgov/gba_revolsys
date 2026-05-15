@@ -34,7 +34,7 @@ public class BaseMain implements UncaughtExceptionHandler {
 
   public static void run(final Class<? extends BaseMain> mainClass, final String[] args) {
     try {
-      final BaseMain main = mainClass.newInstance();
+      final BaseMain main = mainClass.getDeclaredConstructor().newInstance();
       main.processArguments(args);
       main.run();
     } catch (final Throwable e) {

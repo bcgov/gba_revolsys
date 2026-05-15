@@ -1,7 +1,6 @@
 package com.revolsys.net.http.apache5;
 
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -12,9 +11,11 @@ import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.jeometry.common.exception.Exceptions;
+import org.jeometry.common.exception.WrappedException;
 
 import com.revolsys.io.FileUtil;
 import com.revolsys.record.io.format.json.JsonObject;
@@ -29,12 +30,16 @@ public class ApacheHttp {
     final Consumer<ClassicHttpResponse> action) {
     try (
       final CloseableHttpClient httpClient = newClient()) {
-      final ClassicHttpResponse response = getResponse(httpClient, request);
-      action.accept(response);
+      getResponse(httpClient, request, (r) -> {
+        action.accept(r);
+        return null;
+      });
     } catch (final ApacheHttpException e) {
       throw e;
+    } catch (final WrappedException e) {
+      throw e;
     } catch (final Exception e) {
-      throw Exceptions.wrap(getUri(request), e);
+      throw Exceptions.wrap(request.getRequestUri(), e);
     }
   }
 
@@ -42,16 +47,13 @@ public class ApacheHttp {
     final Function<ClassicHttpResponse, V> action) {
     try (
       final CloseableHttpClient httpClient = newClient()) {
-      final ClassicHttpResponse response = getResponse(httpClient, request);
-      try {
-        return action.apply(response);
-      } catch (final Exception e) {
-        throw Exceptions.wrap(request.getUri().toString() + "\n" + e.getMessage(), e);
-      }
+      return getResponse(httpClient, request, (r) -> {
+        return action.apply(r);
+      });
     } catch (final ApacheHttpException e) {
       throw e;
     } catch (final Exception e) {
-      throw Exceptions.wrap(getUri(request), e);
+      throw Exceptions.wrap(request.getRequestUri(), e);
     }
   }
 
@@ -70,7 +72,7 @@ public class ApacheHttp {
   public static InputStream getInputStream(final ClassicHttpRequest request) {
     final CloseableHttpClient httpClient = newClient();
     try {
-      final ClassicHttpResponse response = getResponse(httpClient, request);
+      final ClassicHttpResponse response = httpClient.executeOpen(null, request, null);
       final HttpEntity entity = response.getEntity();
       return new ApacheEntityInputStream(httpClient, entity);
     } catch (final ApacheHttpException e) {
@@ -78,7 +80,7 @@ public class ApacheHttp {
       throw e;
     } catch (final Exception e) {
       FileUtil.closeSilent(httpClient);
-      throw Exceptions.wrap(getUri(request), e);
+      throw Exceptions.wrap(request.getRequestUri().toString(), e);
     }
   }
 
@@ -102,27 +104,28 @@ public class ApacheHttp {
     return execute(requestBuilder, function);
   }
 
-  public static ClassicHttpResponse getResponse(final CloseableHttpClient httpClient,
-    final ClassicHttpRequest request) {
+  public static <T> T getResponse(final CloseableHttpClient httpClient,
+    final ClassicHttpRequest request, final HttpClientResponseHandler<T> handler) {
     try {
-      final ClassicHttpResponse response = httpClient.execute(request);
-      final int statusCode = response.getCode();
-      if (statusCode >= 200 && statusCode <= 299) {
-        return response;
-      } else {
-        throw ApacheHttpException.create(request, response);
-      }
+      return httpClient.execute(request, response -> {
+        final int statusCode = response.getCode();
+        if (statusCode >= 200 && statusCode <= 299) {
+          return handler.handleResponse(response);
+        } else {
+          throw ApacheHttpException.create(request, response);
+        }
+      });
     } catch (final ApacheHttpException e) {
       throw e;
     } catch (final Exception e) {
-      throw Exceptions.wrap(getUri(request), e);
+      throw Exceptions.wrap(request.getRequestUri(), e);
     }
   }
 
-  public static ClassicHttpResponse getResponse(final CloseableHttpClient httpClient,
-    final ClassicRequestBuilder requestBuilder) {
+  public static <T> T getResponse(final CloseableHttpClient httpClient,
+    final ClassicRequestBuilder requestBuilder, final HttpClientResponseHandler<T> handler) {
     final ClassicHttpRequest request = requestBuilder.build();
-    return getResponse(httpClient, request);
+    return getResponse(httpClient, request, handler);
   }
 
   public static String getString(final ClassicHttpResponse response) {
@@ -138,14 +141,6 @@ public class ApacheHttp {
   public static String getString(final ClassicRequestBuilder requestBuilder) {
     final Function<ClassicHttpResponse, String> function = ApacheHttp::getString;
     return execute(requestBuilder, function);
-  }
-
-  public static String getUri(final ClassicHttpRequest request) {
-    try {
-      return request.getUri().toString();
-    } catch (final URISyntaxException e) {
-      throw Exceptions.wrap(e);
-    }
   }
 
   public static CloseableHttpClient newClient() {

@@ -47,7 +47,8 @@ public class GeometryReaderHttpMessageConverter
       final GeometryReaderFactory readerFactory = IoFactory
         .factoryByMediaType(GeometryReaderFactory.class, mediaTypeString);
       if (readerFactory == null) {
-        throw new HttpMessageNotReadableException("Cannot read data in format" + mediaType);
+        throw new HttpMessageNotReadableException("Cannot read data in format" + mediaType,
+          inputMessage);
       } else {
         final InputStreamResource resource = new InputStreamResource("geometryInput", body);
         final GeometryReader reader = readerFactory.newGeometryReader(resource);
@@ -62,7 +63,7 @@ public class GeometryReaderHttpMessageConverter
         return reader;
       }
     } catch (final IOException e) {
-      throw new HttpMessageNotReadableException("Error reading data", e);
+      throw new HttpMessageNotReadableException("Error reading data", e, inputMessage);
     }
   }
 

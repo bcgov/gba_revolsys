@@ -13,6 +13,7 @@ import javax.measure.quantity.Length;
 
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.util.Matrix;
 
 import com.revolsys.geometry.model.Geometry;
 import com.revolsys.geometry.model.impl.PointDoubleXYOrientation;
@@ -161,8 +162,9 @@ public class PdfTextStyleRenderer extends TextStyleViewRenderer {
                 // RoundRectangle2D.Double(
                 // bounds.getX() - 3, bounds.getY() - 1, width + 6, height + 2,
                 // cornerSize, cornerSize);
-                contentStream.fillRect((float)bounds.getX() - 3, (float)bounds.getY() - 1,
+                contentStream.addRect((float)bounds.getX() - 3, (float)bounds.getY() - 1,
                   (float)width + 6, (float)height + 2);
+                contentStream.fill();
               }
               contentStream.setNonStrokingColor(this.style.getTextFill());
 
@@ -171,8 +173,8 @@ public class PdfTextStyleRenderer extends TextStyleViewRenderer {
                 .getFont("/org/apache/pdfbox/resources/ttf/ArialMT.ttf");
 
               contentStream.setFont(pdfFont, font.getSize2D());
-              contentStream.setTextMatrix(transform);
-              contentStream.drawString(line);
+              contentStream.setTextMatrix(new Matrix(transform));
+              contentStream.showText(line);
               contentStream.endText();
 
               transform = lineTransform;

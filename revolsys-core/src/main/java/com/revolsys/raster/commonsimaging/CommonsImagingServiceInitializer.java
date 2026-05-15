@@ -1,6 +1,6 @@
 package com.revolsys.raster.commonsimaging;
 
-import org.apache.commons.imaging.ImageParser;
+import org.apache.commons.imaging.AbstractImageParser;
 import org.apache.commons.imaging.formats.bmp.BmpImageParser;
 import org.apache.commons.imaging.formats.gif.GifImageParser;
 import org.apache.commons.imaging.formats.pcx.PcxImageParser;
@@ -11,7 +11,7 @@ import com.revolsys.io.IoFactoryRegistry;
 
 public class CommonsImagingServiceInitializer {
 
-  private static void addFactories(final String name, final ImageParser imageParser,
+  private static void addFactories(final String name, final AbstractImageParser<?> imageParser,
     final String mimeType) {
     final String fileExtension = imageParser.getDefaultExtension().substring(1);
     final String worldFileExtension = fileExtension.charAt(0) + ""
@@ -27,6 +27,7 @@ public class CommonsImagingServiceInitializer {
   }
 
   public static void serviceInit() {
+
     addFactories("Windows bitmap", new BmpImageParser(), "image/bmp");
     addFactories("Graphics Interchange Format", new GifImageParser(), "image/gif");
     addFactories("Personal Computer eXchange", new PcxImageParser(), "image/vnd.zbrush.pcx");

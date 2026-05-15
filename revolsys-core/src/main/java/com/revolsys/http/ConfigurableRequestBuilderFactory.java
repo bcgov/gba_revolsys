@@ -3,11 +3,11 @@ package com.revolsys.http;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.Header;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicHeader;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicHeader;
 
-import com.revolsys.net.http.SimpleNameValuePair;
+import com.revolsys.net.http.apache5.SimpleNameValuePair;
 
 public class ConfigurableRequestBuilderFactory extends ApacheHttpRequestBuilderFactory {
 

@@ -91,6 +91,8 @@ public interface SwingUtil {
 
   static final Font FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 11);
 
+  SwingUiExecutorService EXECUTOR = new SwingUiExecutorService();
+
   static void addAction(final JComponent component, final KeyStroke keyStroke,
     final String actionKey, final Runnable runnable) {
     final InputMap inputMap = component.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
@@ -510,8 +512,8 @@ public interface SwingUtil {
   static boolean isLeftButtonAndNoModifiers(final MouseEvent event) {
     final boolean leftMouseButton = SwingUtilities.isLeftMouseButton(event);
     if (leftMouseButton) {
-      final int modifiers = event.getModifiers();
-      if (InputEvent.BUTTON1_MASK == modifiers) {
+      final int modifiers = event.getModifiersEx();
+      if (InputEvent.BUTTON1_DOWN_MASK == modifiers) {
         return true;
       }
     }
@@ -1106,6 +1108,4 @@ public interface SwingUtil {
     }
     return activeWindow;
   }
-
-  SwingUiExecutorService EXECUTOR = new SwingUiExecutorService();
 }
