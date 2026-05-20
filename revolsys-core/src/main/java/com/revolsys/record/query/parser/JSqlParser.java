@@ -82,8 +82,6 @@ public class JSqlParser extends AbstractSqlParser {
   public JSqlParser(final RecordDefinition recordDefinition) {
     super(recordDefinition);
 
-    this.converters.put(ParenthesedExpressionList.class, this::convertParenthesis);
-
     this.converters.put(Addition.class, convertBinaryExpression(Add::new));
     this.converters.put(Subtraction.class, convertBinaryExpression(Subtract::new));
     this.converters.put(Division.class, convertBinaryExpression(Divide::new));
@@ -322,13 +320,6 @@ public class JSqlParser extends AbstractSqlParser {
     final Expression subExpression = notExpression.getExpression();
     final Condition condition = convertExpression(subExpression);
     return Q.not(condition);
-  }
-
-  private com.revolsys.record.query.Parenthesis convertParenthesis(final Expression expression) {
-    final ParenthesedExpressionList<?> castExpression = (ParenthesedExpressionList<Expression>)expression;
-    final Expression leftExpression = castExpression.get(0);
-    final QueryValue leftValue = convertExpression(leftExpression);
-    return new com.revolsys.record.query.Parenthesis(leftValue);
   }
 
   public <V extends QueryValue> V convertRightExpression(final BinaryExpression binaryExpression) {
