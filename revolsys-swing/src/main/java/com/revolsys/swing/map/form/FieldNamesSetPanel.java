@@ -12,25 +12,22 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.DefaultRowSorter;
 import javax.swing.DropMode;
 import javax.swing.JButton;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
-import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 
-import org.jdesktop.swingx.HorizontalLayout;
-import org.jdesktop.swingx.JXList;
-import org.jdesktop.swingx.VerticalLayout;
-
 import com.revolsys.swing.Dialogs;
+import com.revolsys.swing.HorizontalLayout;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.component.ValueField;
 import com.revolsys.swing.dnd.transferhandler.ListReorderableTransferHandler;
 import com.revolsys.swing.field.ArrayListComboBoxModel;
@@ -54,7 +51,7 @@ public class FieldNamesSetPanel extends ValueField
 
   private final JButton addButton;
 
-  private final JXList allFieldNames;
+  private final JList<String> allFieldNames;
 
   private final ArrayListModel<String> allFieldNamesModel;
 
@@ -82,7 +79,7 @@ public class FieldNamesSetPanel extends ValueField
 
   private final JButton renameButton;
 
-  private final JXList selectedFieldNames;
+  private final JList<String> selectedFieldNames;
 
   private final ArrayListModel<String> selectedFieldNamesModel;
 
@@ -114,7 +111,7 @@ public class FieldNamesSetPanel extends ValueField
 
     add(toolBar);
 
-    this.filterPanel = new JPanel(new HorizontalLayout(46));
+    this.filterPanel = new JPanel(new HorizontalLayout());
     this.filterPanel.setOpaque(false);
     add(this.filterPanel);
 
@@ -127,10 +124,8 @@ public class FieldNamesSetPanel extends ValueField
     this.fieldsPanel.setOpaque(false);
 
     this.allFieldNamesModel = new ArrayListModel<>(layer.getFieldNames());
-    this.allFieldNames = new JXList(this.allFieldNamesModel);
-    this.allFieldNames.setAutoCreateRowSorter(true);
-    this.allFieldNames.setSortable(true);
-    this.allFieldNames.setSortOrder(SortOrder.ASCENDING);
+    this.allFieldNamesModel.setSortOrder(SortOrder.ASCENDING);
+    this.allFieldNames = new JList<>(this.allFieldNamesModel);
     this.allFieldNames.addListSelectionListener(event -> updateEnabledState());
 
     final JScrollPane layerPathsScrollPane = new JScrollPane(this.allFieldNames);
@@ -153,10 +148,7 @@ public class FieldNamesSetPanel extends ValueField
       () -> actionMoveSelectedDown());
 
     this.selectedFieldNamesModel = new ArrayListModel<>();
-
-    this.selectedFieldNames = new JXList(this.selectedFieldNamesModel);
-    this.selectedFieldNames.setAutoCreateRowSorter(false);
-    this.selectedFieldNames.setSortable(false);
+    this.selectedFieldNames = new JList<>(this.selectedFieldNamesModel);
     this.selectedFieldNames.addListSelectionListener(event -> updateEnabledState());
     this.selectedFieldNames.setDragEnabled(true);
     this.selectedFieldNames.setDropMode(DropMode.INSERT);
@@ -171,7 +163,7 @@ public class FieldNamesSetPanel extends ValueField
     this.allFieldNamesTextFilter = new StringContainsRowFilter();
     final RowFilter<ListModel, Integer> allFieldNamesFilter = RowFilter.andFilter(Arrays.asList(
       new CollectionRowFilter(this.selectedFieldNamesModel, false), this.allFieldNamesTextFilter));
-    this.allFieldNames.setRowFilter(allFieldNamesFilter);
+    this.allFieldNamesModel.setRowFilter(allFieldNamesFilter);
 
     final String fieldNamesSetName = layer.getFieldNamesSetName();
     setFieldNamesSetName(fieldNamesSetName);
@@ -203,9 +195,8 @@ public class FieldNamesSetPanel extends ValueField
     this.selectedFieldNames.clearSelection();
     int firstIndex = Integer.MAX_VALUE;
     for (final Object selectedValue : this.allFieldNames.getSelectedValues()) {
-      int allIndex = this.allFieldNamesModel.indexOf(selectedValue);
+      final int allIndex = this.allFieldNamesModel.indexOf(selectedValue);
       if (allIndex >= 0) {
-        allIndex = this.allFieldNames.convertIndexToView(allIndex);
         if (allIndex < firstIndex) {
           firstIndex = allIndex;
         }
@@ -213,8 +204,7 @@ public class FieldNamesSetPanel extends ValueField
       final String fieldName = (String)selectedValue;
       if (!this.selectedFieldNamesModel.contains(fieldName)) {
         this.selectedFieldNamesModel.add(fieldName);
-        final int index = this.selectedFieldNames
-          .convertIndexToView(this.selectedFieldNamesModel.indexOf(fieldName));
+        final int index = this.selectedFieldNamesModel.indexOf(fieldName);
         this.selectedFieldNames.addSelectionInterval(index, index);
       }
       this.allFieldNamesModel.remove(fieldName);
@@ -402,19 +392,15 @@ public class FieldNamesSetPanel extends ValueField
     this.allFieldNamesModel.setAll(allFieldNames);
     this.allFieldNamesTextFilter.setFilterText("");
     this.allFieldNames.setSelectedIndex(0);
-    this.allFieldNames.setRowFilter(this.allFieldNamesTextFilter);
+    this.allFieldNamesModel.setRowFilter(this.allFieldNamesTextFilter);
     this.selectedFieldNamesModel.setAll(selectedFieldNames);
     this.selectedFieldNames.setSelectedIndex(0);
     this.fieldNamesSetNamesField.setSelectedItem(fieldNamesSetName);
   }
 
   @SuppressWarnings("rawtypes")
-  public void sort(final JXList list) {
-    final RowSorter<? extends ListModel> rowSorter = list.getRowSorter();
-    if (rowSorter instanceof DefaultRowSorter) {
-      final DefaultRowSorter<?, ?> sorter = (DefaultRowSorter<?, ?>)rowSorter;
-      sorter.sort();
-    }
+  public void sort(final JList<?> list) {
+    ((ArrayListModel)list.getModel()).sort();
   }
 
   public void updateEnabledState() {

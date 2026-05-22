@@ -28,13 +28,13 @@ import org.jeometry.common.data.type.DataType;
 import org.jeometry.common.data.type.DataTypes;
 
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.field.Field;
 import com.revolsys.swing.listener.MouseListeners;
 import com.revolsys.swing.listener.MouseListenersBase;
 import com.revolsys.swing.menu.BaseJPopupMenu;
 import com.revolsys.swing.menu.ShowMenuMouseListener;
 import com.revolsys.swing.table.AbstractTableModel;
-import com.revolsys.swing.table.BaseJTable;
 
 public class BaseTableCellEditor extends AbstractCellEditor
   implements TableCellEditor, TableModelListener {

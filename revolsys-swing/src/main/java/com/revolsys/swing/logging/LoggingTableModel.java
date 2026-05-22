@@ -10,19 +10,18 @@ import java.util.List;
 import javax.swing.JTable;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
-
-import org.jdesktop.swingx.plaf.basic.core.BasicTransferable;
-import org.jdesktop.swingx.table.TableColumnExt;
+import javax.swing.table.TableColumn;
 
 import com.revolsys.log.LogbackUtil;
 import com.revolsys.swing.Icons;
 import com.revolsys.swing.TabbedPane;
+import com.revolsys.swing.component.BasicTransferable;
 import com.revolsys.swing.dnd.ClipboardUtil;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.menu.BaseJPopupMenu;
 import com.revolsys.swing.menu.MenuFactory;
 import com.revolsys.swing.parallel.Invoke;
 import com.revolsys.swing.table.AbstractTableModel;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.TablePanel;
 import com.revolsys.util.Property;
 
@@ -57,7 +56,7 @@ public class LoggingTableModel extends AbstractTableModel {
     table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
     for (int i = 0; i < model.getColumnCount(); i++) {
-      final TableColumnExt column = table.getColumnExt(i);
+      final TableColumn column = table.getColumnModel().getColumn(i);
       if (i == 0) {
         column.setMinWidth(180);
         column.setPreferredWidth(180);
@@ -74,6 +73,7 @@ public class LoggingTableModel extends AbstractTableModel {
         column.setPreferredWidth(800);
       }
     }
+    // table.setRowSorter(new TableRowSorter<>(table.getModel()));
     table.setSortOrder(0, SortOrder.DESCENDING);
     table.addMouseListener(new MouseAdapter() {
       @Override

@@ -7,8 +7,8 @@ import org.jeometry.common.data.type.DataType;
 
 import com.revolsys.record.schema.FieldDefinition;
 import com.revolsys.record.schema.RecordDefinition;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.table.AbstractTableModel;
-import com.revolsys.swing.table.BaseJTable;
 
 public class RecordDefinitionTableModel extends AbstractTableModel {
   private static final List<Class<?>> COLUMN_CLASSES = Arrays.<Class<?>> asList(Integer.class,

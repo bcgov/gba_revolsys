@@ -3,9 +3,8 @@ package com.revolsys.swing.map.layer.record.table.predicate;
 import java.awt.Component;
 
 import javax.swing.JComponent;
+import javax.swing.JTable;
 
-import org.jdesktop.swingx.decorator.ComponentAdapter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jeometry.common.awt.WebColors;
 import org.jeometry.common.data.identifier.Identifier;
 import org.jeometry.common.data.type.DataTypes;
@@ -15,11 +14,13 @@ import com.revolsys.record.code.CodeTable;
 import com.revolsys.record.schema.RecordDefinition;
 import com.revolsys.swing.map.layer.record.AbstractRecordLayer;
 import com.revolsys.swing.map.layer.record.LayerRecord;
+import com.revolsys.swing.table.highlighter.HighlightPredicate;
 import com.revolsys.swing.table.highlighter.OddEvenColorHighlighter;
 import com.revolsys.swing.table.record.RecordRowTable;
 import com.revolsys.swing.table.record.model.RecordRowTableModel;
 
 public class ModifiedFieldPredicate implements HighlightPredicate {
+
   public static void add(final RecordRowTable table) {
     final RecordRowTableModel model = table.getModel();
     final ModifiedFieldPredicate predicate = new ModifiedFieldPredicate(model);
@@ -34,11 +35,12 @@ public class ModifiedFieldPredicate implements HighlightPredicate {
   }
 
   @Override
-  public boolean isHighlighted(final Component renderer, final ComponentAdapter adapter) {
+  public boolean isHighlighted(final Component renderer, final JTable table, final int viewRow,
+    final int viewColumn) {
     String toolTip = null;
     boolean highlighted = false;
     try {
-      final int rowIndex = adapter.convertRowIndexToModel(adapter.row);
+      final int rowIndex = table.convertRowIndexToModel(viewRow);
       final Record record = this.model.getRecord(rowIndex);
       if (record instanceof LayerRecord) {
         final LayerRecord layerRecord = (LayerRecord)record;
@@ -46,7 +48,7 @@ public class ModifiedFieldPredicate implements HighlightPredicate {
         if (layer.isDeleted(layerRecord)) {
           highlighted = false;
         } else {
-          final int columnIndex = adapter.convertColumnIndexToModel(adapter.column);
+          final int columnIndex = table.convertColumnIndexToModel(viewColumn);
           final String fieldName = this.model.getColumnFieldName(columnIndex);
           highlighted = layerRecord.isModified(fieldName);
           if (highlighted) {

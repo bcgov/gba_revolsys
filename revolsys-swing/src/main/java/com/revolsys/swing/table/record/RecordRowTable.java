@@ -1,6 +1,8 @@
 package com.revolsys.swing.table.record;
 
 import java.awt.event.MouseEvent;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -14,19 +16,16 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import org.jdesktop.swingx.sort.SortController;
-
 import com.revolsys.geometry.model.Geometry;
 import com.revolsys.record.Record;
 import com.revolsys.record.schema.FieldDefinition;
 import com.revolsys.record.schema.RecordDefinition;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.listener.BaseMouseListener;
 import com.revolsys.swing.map.layer.record.table.model.RecordLayerTableModel;
 import com.revolsys.swing.map.layer.record.table.predicate.ErrorPredicate;
 import com.revolsys.swing.map.layer.record.table.predicate.ModifiedFieldPredicate;
 import com.revolsys.swing.parallel.Invoke;
-import com.revolsys.swing.table.BaseColumnFactory;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.TablePanel;
 import com.revolsys.swing.table.editor.BaseTableCellEditor;
 import com.revolsys.swing.table.record.editor.RecordTableCellEditor;
@@ -58,7 +57,7 @@ public class RecordRowTable extends BaseJTable implements BaseMouseListener {
 
   public RecordRowTable(final RecordRowTableModel model, final TableCellRenderer cellRenderer) {
     super(model);
-    setColumnFactory(new BaseColumnFactory());
+    // setColumnFactory(new BaseColumnFactory());
     this.cellRenderer = cellRenderer;
     setSortable(false);
     setShowHorizontalLines(false);
@@ -196,16 +195,17 @@ public class RecordRowTable extends BaseJTable implements BaseMouseListener {
   public void setRowSorter(final RowSorter<? extends TableModel> sorter) {
     super.setRowSorter(sorter);
     if (sorter != null) {
-      final SortController<?> sortController = getSortController();
+      final RowSorter<? extends TableModel> sortController = getRowSorter();
       if (sortController != null) {
         final RecordRowTableModel model = getTableModel();
-        sortController.resetSortOrders();
+        sortController.setSortKeys(Collections.emptyList());
         final Map<Integer, SortOrder> sortedColumns = model.getSortedColumns();
         for (final Entry<Integer, SortOrder> entry : sortedColumns.entrySet()) {
           final int index = entry.getKey();
           if (index < model.getColumnCount()) {
             final SortOrder sortOrder = entry.getValue();
-            sortController.setSortOrder(index, sortOrder);
+            sortController.setSortKeys(List.of(new RowSorter.SortKey(index, sortOrder)));
+
           }
         }
       }

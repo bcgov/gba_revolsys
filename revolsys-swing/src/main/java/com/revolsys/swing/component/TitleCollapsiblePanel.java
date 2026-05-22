@@ -8,17 +8,15 @@ import java.util.concurrent.Callable;
 
 import javax.swing.SwingUtilities;
 
-import org.jdesktop.swingx.JXCollapsiblePane;
-import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.logging.Logs;
 
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 
 public class TitleCollapsiblePanel extends BasePanel implements MouseListener {
   private static final long serialVersionUID = 1L;
 
-  private final JXCollapsiblePane collapsible;
+  private final CollapsiblePane collapsible;
 
   private final Callable<Component> componentFactory;
 
@@ -30,14 +28,14 @@ public class TitleCollapsiblePanel extends BasePanel implements MouseListener {
 
   private TitleCollapsiblePanel(final String title, final Callable<Component> componentFactory,
     final Component component) {
-    super(new VerticalLayout());
+    setLayout(new VerticalLayout());
     this.componentFactory = componentFactory;
 
     SwingUtil.setTitledBorder(this, title);
-    this.collapsible = new JXCollapsiblePane();
+    this.collapsible = new CollapsiblePane();
     this.collapsible.setCollapsed(true);
     this.collapsible.setOpaque(false);
-    ((JXPanel)this.collapsible.getContentPane()).setOpaque(false);
+    this.collapsible.getContentPanel().setOpaque(false);
     add(this.collapsible);
 
     if (component != null) {

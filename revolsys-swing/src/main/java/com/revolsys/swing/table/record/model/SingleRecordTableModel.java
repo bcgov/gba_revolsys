@@ -5,7 +5,7 @@ import java.util.Map;
 import javax.swing.table.JTableHeader;
 
 import com.revolsys.record.Record;
-import com.revolsys.swing.table.BaseJTable;
+import com.revolsys.swing.field.BaseJTable;
 
 public class SingleRecordTableModel extends AbstractSingleRecordTableModel {
   private static final long serialVersionUID = 1L;

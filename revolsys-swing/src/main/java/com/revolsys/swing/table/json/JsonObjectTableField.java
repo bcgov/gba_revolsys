@@ -7,15 +7,14 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.event.TableModelEvent;
 
-import org.jdesktop.swingx.VerticalLayout;
-
 import com.revolsys.record.io.format.json.Json;
 import com.revolsys.record.io.format.json.JsonObject;
 import com.revolsys.record.schema.FieldDefinition;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.component.ValueField;
 import com.revolsys.swing.field.ArrayListComboBoxModel;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.field.ComboBox;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.TablePanel;
 import com.revolsys.swing.toolbar.ToolBar;
 
@@ -37,7 +36,8 @@ public class JsonObjectTableField extends ValueField {
   private final boolean removeEmptyValues = true;
 
   public JsonObjectTableField(final FieldDefinition field, final List<FieldDefinition> fields) {
-    super(new VerticalLayout(), field.getName(), null);
+    super(field.getName(), null);
+    setLayout(new VerticalLayout());
     setOpaque(false);
 
     this.model = new JsonObjectTableModel(true);
@@ -48,7 +48,7 @@ public class JsonObjectTableField extends ValueField {
     add(tablePanel);
 
     this.table = tablePanel.getTable();
-    this.table.setTerminateEditOnFocusLost(true);
+    this.table.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
 
     this.toolBar = tablePanel.getToolBar();
 

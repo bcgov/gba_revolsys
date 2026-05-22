@@ -4,14 +4,14 @@ import java.awt.Color;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
-import org.jdesktop.swingx.JXSearchField;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+
 import org.jeometry.common.data.type.DataType;
 import org.jeometry.common.data.type.DataTypes;
 import org.jeometry.common.exception.Exceptions;
 
-import com.revolsys.util.OS;
-
-public class SearchField extends JXSearchField implements FocusListener, Field {
+public class SearchField extends JTextField implements FocusListener, Field {
   private static final long serialVersionUID = 1L;
 
   private final FieldSupport fieldSupport;
@@ -23,6 +23,10 @@ public class SearchField extends JXSearchField implements FocusListener, Field {
   public SearchField(final String fieldName) {
     this.fieldSupport = new FieldSupport(this, fieldName, "", false);
     setOpaque(true);
+
+    putClientProperty("JTextField.placeholderText", "Search...");
+    putClientProperty("JTextField.leadingIcon", UIManager.getIcon("Tree.searchIcon"));
+    putClientProperty("JTextField.showClearButton", true);
   }
 
   @Override
@@ -93,14 +97,6 @@ public class SearchField extends JXSearchField implements FocusListener, Field {
     if (this.fieldSupport == null || this.fieldSupport.setOriginalTooltipText(text)) {
       super.setToolTipText(text);
     }
-  }
-
-  @Override
-  public void setUseNativeSearchFieldIfPossible(boolean useNativeSearchFieldIfPossible) {
-    if (OS.isMac()) {
-      useNativeSearchFieldIfPossible = false;
-    }
-    super.setUseNativeSearchFieldIfPossible(useNativeSearchFieldIfPossible);
   }
 
   @Override

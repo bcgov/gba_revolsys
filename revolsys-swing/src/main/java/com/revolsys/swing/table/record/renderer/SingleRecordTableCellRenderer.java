@@ -10,7 +10,6 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 
-import org.jdesktop.swingx.JXTable;
 import org.jeometry.common.number.Numbers;
 
 import com.revolsys.record.schema.RecordDefinition;
@@ -33,8 +32,8 @@ public class SingleRecordTableCellRenderer implements TableCellRenderer {
   @Override
   public Component getTableCellRendererComponent(final JTable table, final Object value,
     final boolean isSelected, final boolean hasFocus, int rowIndex, int columnIndex) {
-    if (table instanceof JXTable) {
-      final JXTable jxTable = (JXTable)table;
+    if (table instanceof JTable) {
+      final JTable jxTable = table;
       rowIndex = jxTable.convertRowIndexToModel(rowIndex);
       columnIndex = jxTable.convertColumnIndexToModel(columnIndex);
     }

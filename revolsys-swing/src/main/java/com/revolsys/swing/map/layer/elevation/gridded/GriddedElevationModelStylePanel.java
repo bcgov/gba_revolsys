@@ -7,12 +7,12 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.JPanel;
 
-import org.jdesktop.swingx.VerticalLayout;
-
 import com.revolsys.elevation.gridded.rasterizer.ColorGradientGriddedElevationModelRasterizer;
 import com.revolsys.elevation.gridded.rasterizer.ColorGriddedElevationModelRasterizer;
 import com.revolsys.elevation.gridded.rasterizer.GriddedElevationModelRasterizer;
 import com.revolsys.elevation.gridded.rasterizer.HillShadeGriddedElevationModelRasterizer;
+import com.revolsys.swing.VerticalLayout;
+import com.revolsys.swing.component.BasePanel;
 import com.revolsys.swing.field.Field;
 import com.revolsys.swing.field.PercentSlider;
 import com.revolsys.swing.map.layer.elevation.gridded.renderer.RasterizerGriddedElevationModelLayerRenderer;
@@ -31,7 +31,7 @@ public class GriddedElevationModelStylePanel extends BaseStylePanel
     this.rasterizer = renderer.getRasterizer();
     final JPanel panel = new JPanel(new BorderLayout());
     add(panel, 1);
-    final JPanel stylePanels = new JPanel(new VerticalLayout(5));
+    final JPanel stylePanels = new BasePanel(new VerticalLayout(5));
     panel.add(stylePanels, BorderLayout.CENTER);
     addPanel(this, "Opacity", renderer, "opacity");
     if (this.rasterizer instanceof ColorGriddedElevationModelRasterizer) {

@@ -5,10 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.TableColumn;
 
-import org.jdesktop.swingx.table.TableColumnExt;
-
-import com.revolsys.swing.table.BaseJTable;
+import com.revolsys.swing.field.BaseJTable;
 
 public class ObjectListTable<T> extends BaseJTable implements Iterable<T> {
   private static final long serialVersionUID = 1L;
@@ -31,7 +30,7 @@ public class ObjectListTable<T> extends BaseJTable implements Iterable<T> {
     super(model);
 
     for (int i = 0; i < model.getColumnCount(); i++) {
-      final TableColumnExt column = getColumnExt(i);
+      final TableColumn column = getColumnModel().getColumn(i);
       column.sizeWidthToFit();
     }
   }

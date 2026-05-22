@@ -1,17 +1,24 @@
 package com.revolsys.swing.component;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.LayoutManager;
+import java.awt.Rectangle;
 
 import javax.swing.BorderFactory;
-
-import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.ScrollableSizeHint;
-import org.jdesktop.swingx.VerticalLayout;
+import javax.swing.JPanel;
+import javax.swing.Scrollable;
+import javax.swing.SwingConstants;
 
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 
-public class BasePanel extends JXPanel {
+public class BasePanel extends JPanel implements Scrollable {
+  // Add to BasePanel
+  public enum ScrollableSizeHint {
+    FIT, PREFERRED_STRETCH, NONE
+  }
+
   private static final long serialVersionUID = 1L;
 
   public static BasePanel newPanelTitled(final String title) {
@@ -36,12 +43,17 @@ public class BasePanel extends JXPanel {
     return panel;
   }
 
+  private ScrollableSizeHint scrollableHeightHint = ScrollableSizeHint.PREFERRED_STRETCH;
+
+  private ScrollableSizeHint scrollableWidthHint = ScrollableSizeHint.FIT;
+
   public BasePanel() {
     this(true);
   }
 
   public BasePanel(final boolean isDoubleBuffered) {
-    this(new VerticalLayout(), isDoubleBuffered);
+    super(new VerticalLayout(), isDoubleBuffered);
+    setOpaque(false);
   }
 
   public BasePanel(final Component... components) {
@@ -57,8 +69,6 @@ public class BasePanel extends JXPanel {
 
   public BasePanel(final LayoutManager layout, final boolean isDoubleBuffered) {
     super(layout, isDoubleBuffered);
-    setScrollableWidthHint(ScrollableSizeHint.FIT);
-    setScrollableHeightHint(ScrollableSizeHint.PREFERRED_STRETCH);
     setOpaque(false);
   }
 
@@ -86,5 +96,47 @@ public class BasePanel extends JXPanel {
       SwingUtil.addLabel(this, label);
       add(component);
     }
+  }
+
+  @Override
+  public Dimension getPreferredScrollableViewportSize() {
+    return getPreferredSize();
+  }
+
+  @Override
+  public int getScrollableBlockIncrement(final Rectangle visibleRect, final int orientation,
+    final int direction) {
+    return orientation == SwingConstants.VERTICAL ? visibleRect.height : visibleRect.width;
+  }
+
+  @Override
+  public boolean getScrollableTracksViewportHeight() {
+    switch (this.scrollableHeightHint) {
+      case FIT:
+        return true;
+      case PREFERRED_STRETCH:
+        return getParent() != null && getPreferredSize().height < getParent().getHeight();
+      default:
+        return false;
+    }
+  }
+
+  @Override
+  public boolean getScrollableTracksViewportWidth() {
+    return this.scrollableWidthHint == ScrollableSizeHint.FIT;
+  }
+
+  @Override
+  public int getScrollableUnitIncrement(final Rectangle visibleRect, final int orientation,
+    final int direction) {
+    return 16;
+  }
+
+  public void setScrollableHeightHint(final ScrollableSizeHint hint) {
+    this.scrollableHeightHint = hint;
+  }
+
+  public void setScrollableWidthHint(final ScrollableSizeHint hint) {
+    this.scrollableWidthHint = hint;
   }
 }

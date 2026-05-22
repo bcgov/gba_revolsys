@@ -2,9 +2,9 @@ package com.revolsys.swing.table.lambda.column;
 
 import javax.swing.table.TableColumn;
 
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.menu.BaseJPopupMenu;
 import com.revolsys.swing.menu.MenuFactory;
-import com.revolsys.swing.table.BaseJTable;
 
 public interface TableModelColumn {
 

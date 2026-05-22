@@ -6,7 +6,7 @@ import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jdesktop.swingx.table.TableColumnExt;
+import javax.swing.table.TableColumn;
 
 import com.revolsys.geometry.model.BoundingBox;
 import com.revolsys.geometry.model.Geometry;
@@ -15,10 +15,10 @@ import com.revolsys.raster.GeoreferencedImage;
 import com.revolsys.raster.MappedLocation;
 import com.revolsys.swing.action.enablecheck.EnableCheck;
 import com.revolsys.swing.action.enablecheck.ObjectPropertyEnableCheck;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.field.Slider;
 import com.revolsys.swing.map.layer.Project;
 import com.revolsys.swing.menu.MenuFactory;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.NumberTableCellRenderer;
 import com.revolsys.swing.table.TablePanel;
 import com.revolsys.swing.table.object.ObjectListTable;
@@ -48,12 +48,12 @@ public class TiePointsPanel extends TablePanel implements PropertyChangeListener
     this.layer = layer;
 
     final BaseJTable table = getTable();
-    final TableColumnExt column1 = table.getColumnExt(0);
+    final TableColumn column1 = table.getColumnModel().getColumn(0);
     column1.setMinWidth(30);
     column1.setWidth(30);
     column1.setMaxWidth(30);
     for (int i = 3; i < table.getColumnCount(); i++) {
-      final TableColumnExt column = table.getColumnExt(i);
+      final TableColumn column = table.getColumnModel().getColumn(i);
       column.setMinWidth(150);
       column.setCellRenderer(new NumberTableCellRenderer("#,###.000"));
     }

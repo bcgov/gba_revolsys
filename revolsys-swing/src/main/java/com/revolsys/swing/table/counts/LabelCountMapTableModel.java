@@ -1,31 +1,24 @@
 package com.revolsys.swing.table.counts;
 
-import java.awt.Component;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JTable;
-import javax.swing.RowSorter;
-import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 
-import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.ComponentAdapter;
-import org.jdesktop.swingx.table.TableColumnExt;
 import org.jeometry.common.awt.WebColors;
 import org.jeometry.common.io.PathNameProxy;
 
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.parallel.Invoke;
 import com.revolsys.swing.table.AbstractTableModel;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.BaseTableColumnModelListener;
+import com.revolsys.swing.table.highlighter.ColorHighlighter;
 import com.revolsys.util.Counter;
 import com.revolsys.util.count.CategoryLabelCountMap;
 import com.revolsys.util.count.LabelCounters;
@@ -113,7 +106,7 @@ public class LabelCountMapTableModel extends AbstractTableModel {
           fireTableStructureChanged();
           final BaseJTable table = getTable();
           if (table != null) {
-            final TableColumn column = new TableColumnExt(columnIndex);
+            final TableColumn column = new TableColumn(columnIndex);
             setColumnWidth(columnIndex, column);
             table.addColumn(column);
           }
@@ -275,30 +268,28 @@ public class LabelCountMapTableModel extends AbstractTableModel {
     }
     table.setAutoCreateColumnsFromModel(false);
     table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-    final RowSorter<? extends TableModel> rowSorter = table.getRowSorter();
-    final SortKey sortKey = new SortKey(0, SortOrder.ASCENDING);
-    rowSorter.setSortKeys(Arrays.asList(sortKey));
+    table.setSortOrder(0, SortOrder.ASCENDING);
 
-    table.addHighlighter(
-      new ColorHighlighter((final Component renderer, final ComponentAdapter adapter) -> {
-        final int row = adapter.convertRowIndexToModel(adapter.row);
+    table.addHighlighter(new ColorHighlighter(
+
+      (c, t, row, col) -> {
         if (getValueAt(row, 0).equals(LabelCountMapTableModel.this.selectedLabel)) {
           return true;
         }
         return false;
-      }, WebColors.ForestGreen, WebColors.Yellow, WebColors.DarkGreen, WebColors.Yellow));
+      },
 
-    table.addHighlighter(
-      new ColorHighlighter((final Component renderer, final ComponentAdapter adapter) -> {
-        final int column = adapter.convertColumnIndexToModel(adapter.column);
-        final int row = adapter.convertRowIndexToModel(adapter.row);
-        if (getValueAt(row, 0).equals(LabelCountMapTableModel.this.selectedLabel)) {
-          if (getColumnName(column).equals(LabelCountMapTableModel.this.selectedCountName)) {
-            return true;
-          }
+      WebColors.ForestGreen, WebColors.Yellow, WebColors.DarkGreen, WebColors.Yellow));
+
+    table.addHighlighter(new ColorHighlighter((c, t, row, column) -> {
+      if (getValueAt(row, 0).equals(LabelCountMapTableModel.this.selectedLabel)) {
+        if (getColumnName(column).equals(LabelCountMapTableModel.this.selectedCountName)) {
+          return true;
         }
-        return false;
-      }, WebColors.Yellow, WebColors.DarkGreen, WebColors.Gold, WebColors.DarkGreen));
+      }
+      return false;
+
+    }, WebColors.Yellow, WebColors.DarkGreen, WebColors.Gold, WebColors.DarkGreen));
     return table;
   }
 

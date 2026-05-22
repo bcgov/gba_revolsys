@@ -21,6 +21,7 @@ import org.jeometry.common.data.type.DataTypes;
 
 import com.revolsys.swing.action.enablecheck.ObjectPropertyEnableCheck;
 import com.revolsys.swing.dnd.ClipboardUtil;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.menu.BaseJPopupMenu;
 import com.revolsys.swing.menu.MenuFactory;
 import com.revolsys.swing.menu.MenuSourceHolder;

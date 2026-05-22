@@ -16,9 +16,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-import org.jdesktop.swingx.VerticalLayout;
-
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.action.RunnableAction;
 
 public class BaseJPopupMenu extends JPopupMenu {

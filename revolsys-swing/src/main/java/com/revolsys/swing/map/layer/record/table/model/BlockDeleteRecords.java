@@ -15,13 +15,13 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.awt.WebColors;
 
 import com.revolsys.collection.list.Lists;
 import com.revolsys.collection.map.Maps;
 import com.revolsys.swing.Dialogs;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.component.BasePanel;
 import com.revolsys.swing.map.layer.record.AbstractRecordLayer;
 import com.revolsys.swing.map.layer.record.LayerRecord;

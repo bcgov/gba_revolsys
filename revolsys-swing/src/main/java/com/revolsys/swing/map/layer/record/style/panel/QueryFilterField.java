@@ -7,9 +7,8 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 
-import org.jdesktop.swingx.VerticalLayout;
-
 import com.revolsys.record.query.Condition;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.component.ValueField;
 import com.revolsys.swing.field.QueryWhereConditionField;
 import com.revolsys.swing.field.TextArea;
@@ -29,6 +28,7 @@ public class QueryFilterField extends ValueField implements PropertyChangeListen
   public QueryFilterField(final AbstractRecordLayer layer, final String fieldName,
     final String query) {
     super(new VerticalLayout());
+
     this.layer = layer;
     this.queryField = new TextArea(fieldName, query, 5, 30);
     Property.addListener(this.queryField, fieldName, this);

@@ -8,11 +8,12 @@ import java.beans.PropertyChangeListener;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.data.type.DataType;
 
 import com.revolsys.geometry.model.GeometryDataTypes;
 import com.revolsys.swing.Panels;
+import com.revolsys.swing.VerticalLayout;
+import com.revolsys.swing.component.BasePanel;
 import com.revolsys.swing.field.Field;
 import com.revolsys.swing.map.layer.record.renderer.GeometryStyleLayerRenderer;
 import com.revolsys.swing.map.layer.record.style.GeometryStyle;
@@ -38,12 +39,13 @@ public class GeometryStylePanel extends BaseStylePanel implements PropertyChange
     if (this.geometryDataType != null) {
       final JPanel panel = new JPanel(new BorderLayout());
       add(panel, 1);
-      final JPanel stylePanels = new JPanel(new VerticalLayout(5));
+      final JPanel stylePanels = new BasePanel(new VerticalLayout(5));
       panel.add(stylePanels, BorderLayout.CENTER);
 
       this.previews = Panels.titledTransparentVerticalLayout("Preview", 5);
 
       final JPanel previewContainer = new JPanel(new VerticalLayout());
+
       previewContainer.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
       previewContainer.add(this.previews);
       panel.add(previewContainer, BorderLayout.EAST);

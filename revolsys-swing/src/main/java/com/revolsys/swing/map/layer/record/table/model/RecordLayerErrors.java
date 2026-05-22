@@ -11,12 +11,11 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
-import org.jdesktop.swingx.VerticalLayout;
-
 import com.revolsys.beans.ObjectPropertyException;
 import com.revolsys.record.Record;
 import com.revolsys.swing.Dialogs;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.component.BasePanel;
 import com.revolsys.swing.map.layer.record.AbstractRecordLayer;
 import com.revolsys.swing.map.layer.record.LayerRecord;
@@ -82,6 +81,7 @@ public class RecordLayerErrors {
           new JLabel("<html><p><b style=\"color:red\">Error " + this.title
             + " for layer:</b></p><p>" + layerPath + "</p>"),
           tableModel.newPanel());
+
         final Rectangle screenBounds = SwingUtil.getScreenBounds();
         panel.setPreferredSize(
           new Dimension(screenBounds.width - 300, tableModel.getRowCount() * 22 + 75));

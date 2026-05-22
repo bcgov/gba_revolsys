@@ -3,9 +3,12 @@ package com.revolsys.swing.list;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.ListModel;
+import javax.swing.RowFilter;
+import javax.swing.SortOrder;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
@@ -21,6 +24,14 @@ public class ArrayListModel<T> extends ArrayList<T>
   private static final long serialVersionUID = 1L;
 
   private final List<ListDataListener> listeners = new ArrayList<>();
+
+  private Comparator<T> comparator = (Comparator<T>)Comparator.naturalOrder();
+
+  private SortOrder sortOrder = SortOrder.ASCENDING;
+
+  private RowFilter<ListModel, Integer> rowFilter = null;
+
+  private List<T> unfilteredItems = null;
 
   public ArrayListModel() {
   }
@@ -81,6 +92,10 @@ public class ArrayListModel<T> extends ArrayList<T>
         }
       }
     });
+  }
+
+  public void clearRowFilter() {
+    this.setRowFilter(null);
   }
 
   protected void fireContentsChanged(final int index0, final int index1) {
@@ -238,6 +253,76 @@ public class ArrayListModel<T> extends ArrayList<T>
           fireContentsChanged(0, newSize - 1);
         }
       }
+    });
+  }
+
+  public void setComparator(final Comparator<T> comparator) {
+    this.comparator = comparator;
+  }
+
+  public void setRowFilter(final RowFilter<ListModel, Integer> rowFilter) {
+    this.rowFilter = rowFilter;
+    if (rowFilter == null) {
+      if (this.unfilteredItems != null) {
+        setAll(this.unfilteredItems);
+        this.unfilteredItems = null;
+      }
+
+    } else {
+      this.unfilteredItems = Lists.toArray(this);
+      final List<T> filtered = new ArrayList<>();
+      for (int i = 0; i < this.unfilteredItems.size(); i++) {
+        final int fi = i;
+        final T item = this.unfilteredItems.get(i);
+        if (this.rowFilter.include(new RowFilter.Entry<ArrayListModel<T>, Integer>() {
+          @Override
+          public Integer getIdentifier() {
+            return fi;
+          }
+
+          @Override
+          public ArrayListModel<T> getModel() {
+            return ArrayListModel.this;
+          }
+
+          @Override
+          public String getStringValue(final int index) {
+            return item == null ? "" : item.toString();
+          }
+
+          @Override
+          public Object getValue(final int index) {
+            return item;
+          }
+
+          @Override
+          public int getValueCount() {
+            return 1; // single column — the item itself
+          }
+        })) {
+          filtered.add(item);
+        }
+      }
+      setAll(filtered);
+    }
+  }
+
+  public void setSortOrder(final SortOrder sortOrder) {
+    this.sortOrder = sortOrder;
+    sort();
+  }
+
+  public void sort() {
+    if (this.sortOrder == SortOrder.UNSORTED) {
+      return;
+    }
+
+    super.sort((a, b) -> {
+      final int result = this.comparator.compare(a, b);
+      return this.sortOrder == SortOrder.DESCENDING ? -result : result;
+    });
+    Invoke.andWait(() -> {
+      fireContentsChanged(0, getSize() - 1);
     });
   }
 }

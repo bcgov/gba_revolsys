@@ -9,24 +9,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.swing.DefaultRowSorter;
 import javax.swing.JButton;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.RowFilter;
-import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.jdesktop.swingx.HorizontalLayout;
-import org.jdesktop.swingx.JXList;
-import org.jdesktop.swingx.VerticalLayout;
-
 import com.revolsys.swing.Borders;
+import com.revolsys.swing.HorizontalLayout;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.component.ValueField;
 import com.revolsys.swing.field.CheckBox;
 import com.revolsys.swing.field.SearchField;
@@ -49,7 +46,7 @@ public class SnapLayersPanel extends ValueField implements ActionListener, ListS
 
   private final AbstractRecordLayer layer;
 
-  private final JXList layerPathsField;
+  private final JList layerPathsField;
 
   private final ArrayListModel<String> layerPathsModel;
 
@@ -57,7 +54,7 @@ public class SnapLayersPanel extends ValueField implements ActionListener, ListS
 
   private final JButton removeButton;
 
-  private final JXList snapLayerPathsField;
+  private final JList snapLayerPathsField;
 
   private final ArrayListModel<String> snapLayerPathsModel;
 
@@ -80,7 +77,7 @@ public class SnapLayersPanel extends ValueField implements ActionListener, ListS
     snapAllPanel.add(this.snapToAllLayers);
     GroupLayouts.makeColumns(snapAllPanel, 2, false);
 
-    this.filterPanel = new JPanel(new HorizontalLayout(46));
+    this.filterPanel = new JPanel(new HorizontalLayout(45));
     this.filterPanel.setOpaque(false);
     add(this.filterPanel);
 
@@ -107,10 +104,8 @@ public class SnapLayersPanel extends ValueField implements ActionListener, ListS
         this.layerPathsModel.add(layerPath);
       }
     }
-    this.layerPathsField = new JXList(this.layerPathsModel);
-    this.layerPathsField.setAutoCreateRowSorter(true);
-    this.layerPathsField.setSortable(true);
-    this.layerPathsField.setSortOrder(SortOrder.ASCENDING);
+    this.layerPathsField = new JList<>(this.layerPathsModel);
+    this.layerPathsModel.setSortOrder(SortOrder.ASCENDING);
     this.layerPathsField.addListSelectionListener(this);
     final JScrollPane layerPathsScrollPane = new JScrollPane(this.layerPathsField);
     layerPathsScrollPane.setPreferredSize(new Dimension(350, 400));
@@ -128,13 +123,11 @@ public class SnapLayersPanel extends ValueField implements ActionListener, ListS
     final Collection<String> snapLayerPaths = layer.getSnapLayerPaths();
     this.snapLayerPathsModel = new ArrayListModel<>(snapLayerPaths);
 
-    this.snapLayerPathsField = new JXList(this.snapLayerPathsModel);
-    this.snapLayerPathsField.setAutoCreateRowSorter(true);
-    this.snapLayerPathsField.setSortable(true);
-    this.snapLayerPathsField.setSortOrder(SortOrder.ASCENDING);
+    this.snapLayerPathsField = new JList(this.snapLayerPathsModel);
+    this.snapLayerPathsModel.setSortOrder(SortOrder.ASCENDING);
     this.snapLayerPathsField.addListSelectionListener(this);
     this.snapLayerPathsTextFilter = new StringContainsRowFilter();
-    this.snapLayerPathsField.setRowFilter(this.snapLayerPathsTextFilter);
+    this.snapLayerPathsModel.setRowFilter(this.snapLayerPathsTextFilter);
 
     final JScrollPane snapScrollPane = new JScrollPane(this.snapLayerPathsField);
     snapScrollPane.setPreferredSize(new Dimension(350, 400));
@@ -144,7 +137,7 @@ public class SnapLayersPanel extends ValueField implements ActionListener, ListS
     this.layerPathsTextFilter = new StringContainsRowFilter();
     final RowFilter<ListModel, Integer> layerPathsFilter = RowFilter.andFilter(Arrays
       .asList(new CollectionRowFilter(this.snapLayerPathsModel, false), this.layerPathsTextFilter));
-    this.layerPathsField.setRowFilter(layerPathsFilter);
+    this.layerPathsModel.setRowFilter(layerPathsFilter);
     updateEnabledState();
   }
 
@@ -173,13 +166,15 @@ public class SnapLayersPanel extends ValueField implements ActionListener, ListS
       final String layerPath = (String)selectedValue;
       if (!this.snapLayerPathsModel.contains(layerPath)) {
         this.snapLayerPathsModel.add(layerPath);
-        final RowSorter<? extends ListModel> rowSorter = this.layerPathsField.getRowSorter();
-        if (rowSorter instanceof DefaultRowSorter) {
-          final DefaultRowSorter<?, ?> sorter = (DefaultRowSorter<?, ?>)rowSorter;
-          sorter.sort();
-        }
-        final int index = this.snapLayerPathsField
-          .convertIndexToView(this.snapLayerPathsModel.indexOf(layerPath));
+        // final RowSorter<? extends ListModel> rowSorter =
+        // this.layerPathsField.getRowSorter();
+        // if (rowSorter instanceof DefaultRowSorter) {
+        // final DefaultRowSorter<?, ?> sorter = (DefaultRowSorter<?,
+        // ?>)rowSorter;
+        // sorter.sort();
+        // }
+        this.layerPathsModel.sort();
+        final int index = this.snapLayerPathsModel.indexOf(layerPath);
         this.snapLayerPathsField.addSelectionInterval(index, index);
       }
     }
@@ -202,12 +197,8 @@ public class SnapLayersPanel extends ValueField implements ActionListener, ListS
     this.layer.setSnapLayerPaths(layerPaths);
   }
 
-  public void sort(final JXList list) {
-    final RowSorter<? extends ListModel> rowSorter = list.getRowSorter();
-    if (rowSorter instanceof DefaultRowSorter) {
-      final DefaultRowSorter<?, ?> sorter = (DefaultRowSorter<?, ?>)rowSorter;
-      sorter.sort();
-    }
+  public void sort(final JList list) {
+    ((ArrayListModel)list.getModel()).sort();
   }
 
   public void updateEnabledState() {

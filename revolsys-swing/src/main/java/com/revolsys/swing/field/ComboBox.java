@@ -18,13 +18,14 @@ import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.text.JTextComponent;
 
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.jeometry.common.data.type.DataType;
 import org.jeometry.common.exception.Exceptions;
 
+import com.revolsys.swing.component.AutoCompleteDecorator;
 import com.revolsys.util.Strings;
 
 public class ComboBox<T> extends JComboBox<T> implements Field, KeyListener {
+
   private static final long serialVersionUID = 1L;
 
   public static <V> ComboBox<V> newComboBox(final String fieldName, final Collection<V> items) {
@@ -92,12 +93,15 @@ public class ComboBox<T> extends JComboBox<T> implements Field, KeyListener {
       setRenderer(stringConverter);
     }
     AutoCompleteDecorator.decorate(this, stringConverter);
+    setEditor(new ModelComboBoxEditor(stringConverter));
+
     final JComponent editorComponent = (JComponent)getEditor().getEditorComponent();
     this.fieldSupport = new FieldSupport(this, editorComponent, fieldName, null, true);
     addActionListener((_) -> {
       final Object selectedItem = getSelectedItem();
       setFieldValue(selectedItem);
     });
+
   }
 
   @Override

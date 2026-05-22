@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JTable;
+import javax.swing.table.TableColumn;
 
-import org.jdesktop.swingx.table.TableColumnExt;
 import org.jeometry.common.compare.NumericComparator;
 import org.jeometry.common.data.identifier.Identifier;
 import org.jeometry.common.data.type.DataTypes;
@@ -14,8 +14,8 @@ import com.revolsys.geometry.model.Geometry;
 import com.revolsys.record.code.CodeTable;
 import com.revolsys.record.schema.FieldDefinition;
 import com.revolsys.record.schema.RecordDefinition;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.menu.BaseJPopupMenu;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.record.editor.RecordTableCellEditor;
 import com.revolsys.swing.table.record.renderer.SingleRecordTableCellRenderer;
 import com.revolsys.util.Strings;
@@ -58,14 +58,14 @@ public abstract class AbstractSingleRecordTableModel extends AbstractRecordTable
       columnWidth = (740 - maxTitleWidth) / 2;
     }
     for (int i = 0; i < columnCount; i++) {
-      final TableColumnExt column = table.getColumnExt(i);
-      column.setSortable(model.isColumnSortable(i));
+      final TableColumn column = table.getColumnModel().getColumn(i);
+      table.setColumnSortable(i, model.isColumnSortable(i));
       column.setCellRenderer(cellRenderer);
       if (i == 0) {
         column.setMinWidth(40);
         column.setPreferredWidth(40);
         column.setMaxWidth(40);
-        column.setComparator(new NumericComparator());
+        table.setColumnComparator(i, new NumericComparator());
       } else if (i == 1) {
         column.setMinWidth(maxTitleWidth);
         column.setPreferredWidth(maxTitleWidth);

@@ -50,12 +50,26 @@
       <groupId>com.revolsys.open</groupId>
       <artifactId>revolsys-gdal</artifactId>
     </dependency>
-    <!-- todo consider removing this (swingx in general) -->
-    <dependency>
+    <!-- todo consider removing this (swingx in general) -->    
+    <!--<dependency>
       <groupId>org.swinglabs.swingx</groupId>
       <artifactId>swingx-all</artifactId>
       <version>1.6.5-1</version>
     </dependency>
+    
+        <dependency>
+    <groupId>com.formdev</groupId>
+    <artifactId>flatlaf</artifactId>
+    <version>3.7.1</version>
+</dependency>
+    
+    -->
+
+<dependency>
+    <groupId>org.jdatepicker</groupId>
+    <artifactId>jdatepicker</artifactId>
+    <version>2.0.1</version>
+</dependency>
     
     <dependency>
       <groupId>de.sciss</groupId>

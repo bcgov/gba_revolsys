@@ -14,13 +14,12 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 
-import org.jdesktop.swingx.VerticalLayout;
-
 import com.revolsys.record.io.format.json.JsonObject;
 import com.revolsys.record.schema.FieldDefinition;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.component.BasePanel;
-import com.revolsys.swing.table.BaseJTable;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.table.editor.BaseTableCellEditor;
 import com.revolsys.swing.toolbar.ToolBar;
 
@@ -72,7 +71,7 @@ public class JsonObjectRecordLayerTableCellEditor extends BaseTableCellEditor {
 
   @Override
   public void cancelCellEditing() {
-    this.table.setTerminateEditOnFocusLost(true);
+    this.table.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
     this.field.cancelCellEditing();
     super.cancelCellEditing();
     this.dialog.setVisible(false);
@@ -86,7 +85,8 @@ public class JsonObjectRecordLayerTableCellEditor extends BaseTableCellEditor {
   @Override
   public Component getTableCellEditorComponent(final JTable table, final Object value,
     final boolean isSelected, final int rowIndex, final int columnIndex) {
-    this.table.setTerminateEditOnFocusLost(false);
+    this.table.putClientProperty("terminateEditOnFocusLost", Boolean.FALSE);
+
     JsonObject jsonObject = this.fieldDefinition.toFieldValue(value);
     if (jsonObject == null) {
       jsonObject = JsonObject.tree();
@@ -108,7 +108,8 @@ public class JsonObjectRecordLayerTableCellEditor extends BaseTableCellEditor {
 
   @Override
   public boolean stopCellEditing() {
-    this.table.setTerminateEditOnFocusLost(true);
+    this.table.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
+
     this.field.stopCellEditing();
     final JsonObject fieldValue = this.field.getFieldValue();
     if (fieldValue != null) {

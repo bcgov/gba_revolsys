@@ -26,11 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.table.DefaultTableModel;
 
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.ScrollableSizeHint;
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.data.type.DataType;
 import org.jeometry.common.logging.Logs;
 import org.jeometry.common.number.Doubles;
@@ -61,10 +57,13 @@ import com.revolsys.swing.Icons;
 import com.revolsys.swing.Panels;
 import com.revolsys.swing.RsSwingServiceInitializer;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.action.enablecheck.EnableCheck;
 import com.revolsys.swing.component.BasePanel;
+import com.revolsys.swing.component.BasePanel.ScrollableSizeHint;
 import com.revolsys.swing.component.TabbedValuePanel;
 import com.revolsys.swing.component.ValueField;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.field.Field;
 import com.revolsys.swing.layout.GroupLayouts;
 import com.revolsys.swing.listener.BeanPropertyListener;
@@ -75,6 +74,7 @@ import com.revolsys.swing.menu.MenuFactory;
 import com.revolsys.swing.parallel.BackgroundTask;
 import com.revolsys.swing.parallel.Invoke;
 import com.revolsys.swing.preferences.PreferenceFields;
+import com.revolsys.swing.table.AbstractTableModel;
 import com.revolsys.swing.table.NumberTableCellRenderer;
 import com.revolsys.swing.tree.TreeNodes;
 import com.revolsys.swing.tree.node.file.PathTreeNode;
@@ -727,6 +727,7 @@ public abstract class AbstractLayer extends BaseObjectWithProperties
     final GeometryFactory geometryFactory = getGeometryFactory();
     if (geometryFactory != null) {
       final JPanel panel = new JPanel(new VerticalLayout(5));
+      // new VerticalLayout(5));
       tabPanel.addTab("Spatial", "world", panel);
 
       final JPanel extentPanel = Panels.titledTransparent("Extent");
@@ -753,27 +754,60 @@ public abstract class AbstractLayer extends BaseObjectWithProperties
         extentPanel.add(extentLabel, BorderLayout.CENTER);
 
         final int boundingBoxAxisCount = boundingBox.getAxisCount();
-        final DefaultTableModel boundingBoxTableModel = new DefaultTableModel(new Object[] {
-          "AXIS", "MIN", "MAX"
-        }, 0);
-        boundingBoxTableModel.addRow(new Object[] {
+        final List<Object[]> rows = new ArrayList<>();
+        rows.add(new Object[] {
           "X", minX, maxX
         });
-        boundingBoxTableModel.addRow(new Object[] {
+        rows.add(new Object[] {
           "Y", minY, maxY
         });
         if (boundingBoxAxisCount > 2) {
-          boundingBoxTableModel.addRow(new Object[] {
+          rows.add(new Object[] {
             "Z", boundingBox.getMinZ(), boundingBox.getMaxZ()
           });
         }
-        final JXTable boundingBoxTable = new JXTable(boundingBoxTableModel);
+
+        final AbstractTableModel boundingBoxTableModel = new AbstractTableModel() {
+          private static final long serialVersionUID = 1L;
+
+          private final String[] columns = {
+            "AXIS", "MIN", "MAX"
+          };
+
+          @Override
+          public int getColumnCount() {
+            return this.columns.length;
+          }
+
+          @Override
+          public String getColumnName(final int column) {
+            return this.columns[column];
+          }
+
+          @Override
+          public int getRowCount() {
+            return rows.size();
+          }
+
+          @Override
+          public Object getValueAt(final int row, final int column) {
+            return rows.get(row)[column];
+          }
+
+          @Override
+          public boolean isCellEditable(final int row, final int column) {
+            return false;
+          }
+        };
+
+        final BaseJTable boundingBoxTable = new BaseJTable(boundingBoxTableModel);
+
         boundingBoxTable.setVisibleRowCount(3);
         boundingBoxTable.setDefaultEditor(Object.class, null);
         boundingBoxTable.setDefaultRenderer(Object.class, new NumberTableCellRenderer());
         final JScrollPane boundingBoxScroll = new JScrollPane(boundingBoxTable);
         extentPanel.add(boundingBoxScroll, BorderLayout.EAST);
-        boundingBoxTable.getColumnExt(0).setMaxWidth(31);
+        boundingBoxTable.getColumnModel().getColumn(0).setMaxWidth(31);
       }
 
       panel.add(extentPanel);

@@ -8,7 +8,6 @@ import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 
-import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
 import org.jeometry.common.data.identifier.Identifier;
 
 import com.revolsys.record.code.CodeTable;
@@ -20,14 +19,16 @@ public class CodeTableComboBoxModel extends AbstractListModel<Identifier>
   implements ComboBoxModel<Identifier>, PropertyChangeListener, Closeable {
   private static final long serialVersionUID = 1L;
 
-  public static ComboBoxCellEditor newCellEditor(final CodeTable codeTable) {
+  // DefaultCellEditor
+  public static AutoCompleteComboBoxCellEditor<Identifier> newCellEditor(
+    final CodeTable codeTable) {
     return newCellEditor(codeTable.getName(), codeTable, false, false);
   }
 
-  public static ComboBoxCellEditor newCellEditor(final String fieldName, final CodeTable codeTable,
-    final boolean allowNull, final boolean idSuffix) {
+  public static AutoCompleteComboBoxCellEditor<Identifier> newCellEditor(final String fieldName,
+    final CodeTable codeTable, final boolean allowNull, final boolean idSuffix) {
     final ComboBox<Identifier> comboBox = newComboBox(fieldName, codeTable, allowNull, idSuffix);
-    return new ComboBoxCellEditor(comboBox);
+    return new AutoCompleteComboBoxCellEditor<Identifier>(comboBox);
   }
 
   public static ComboBox<Identifier> newComboBox(final CodeTable codeTable) {

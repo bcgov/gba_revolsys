@@ -32,8 +32,6 @@ import javax.swing.Icon;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
-import org.jdesktop.swingx.icon.EmptyIcon;
-
 /**
  * {@code IconBorder} creates a border that places an {@code Icon} in the border
  * on the horizontal axis. The border does not add any additional insets other
@@ -50,11 +48,6 @@ import org.jdesktop.swingx.icon.EmptyIcon;
  * @version 1.1
  */
 public class IconBorder implements Border, Serializable {
-
-  /**
-   * An empty icon.
-   */
-  public static final Icon EMPTY_ICON = new EmptyIcon(16, 16);
 
   /**
    *
@@ -245,16 +238,24 @@ public class IconBorder implements Border, Serializable {
       this.iconPosition);
     if (iconPosition == SwingConstants.NORTH_EAST) {
       this.iconBounds.y = y + this.padding;
-      this.iconBounds.x = x + width - this.padding - this.icon.getIconWidth();
+      this.iconBounds.x = x + width - this.padding
+        - (this.icon == null ? 16 : this.icon.getIconWidth());
     } else if (iconPosition == SwingConstants.EAST) { // EAST
       this.iconBounds.y = y + (height - this.icon.getIconHeight()) / 2;
-      this.iconBounds.x = x + width - this.padding - this.icon.getIconWidth();
+      this.iconBounds.x = x + width - this.padding
+        - (this.icon == null ? 16 : this.icon.getIconWidth());
     } else if (iconPosition == SwingConstants.WEST) {
-      this.iconBounds.y = y + (height - this.icon.getIconHeight()) / 2;
+      this.iconBounds.y = y + (height - (this.icon == null ? 16 : this.icon.getIconHeight())) / 2;
       this.iconBounds.x = x + this.padding;
     }
-    this.iconBounds.width = this.icon.getIconWidth();
-    this.iconBounds.height = this.icon.getIconHeight();
+    if (this.icon != null) {
+      this.iconBounds.width = this.icon.getIconWidth();
+      this.iconBounds.height = this.icon.getIconHeight();
+    } else {
+      this.iconBounds.width = 16;
+      this.iconBounds.height = 16;
+    }
+
     this.icon.paintIcon(c, g, this.iconBounds.x, this.iconBounds.y);
   }
 
@@ -267,7 +268,7 @@ public class IconBorder implements Border, Serializable {
    * @see #EMPTY_ICON
    */
   public void setIcon(final Icon validIcon) {
-    this.icon = validIcon == null ? EMPTY_ICON : validIcon;
+    this.icon = validIcon == null ? null : validIcon;
   }
 
   /**

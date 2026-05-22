@@ -8,10 +8,10 @@ import javax.swing.table.TableColumn;
 
 import com.revolsys.record.Record;
 import com.revolsys.swing.action.RunnableAction;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.menu.BaseJPopupMenu;
 import com.revolsys.swing.menu.MenuFactory;
 import com.revolsys.swing.table.AbstractTableModel;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.util.Property;
 
 public class ColumnBasedTableModel extends AbstractTableModel {
@@ -51,7 +51,7 @@ public class ColumnBasedTableModel extends AbstractTableModel {
 
   public void applyTableColumnSettings(final BaseJTable table) {
     for (int i = 0; i < this.columns.size(); i++) {
-      final TableColumn tableColumn = table.getColumnExt(i);
+      final TableColumn tableColumn = table.getColumnModel().getColumn(i);
       final TableModelColumn column = getColumn(i);
       column.applySettings(table, tableColumn);
     }

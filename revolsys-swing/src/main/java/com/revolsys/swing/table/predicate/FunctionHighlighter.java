@@ -2,19 +2,20 @@ package com.revolsys.swing.table.predicate;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.util.function.BiFunction;
 
-import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.ComponentAdapter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.Highlighter;
+import javax.swing.JTable;
+
+import org.apache.commons.lang3.function.TriFunction;
 import org.jeometry.common.logging.Logs;
 
+import com.revolsys.swing.table.highlighter.ColorHighlighter;
+import com.revolsys.swing.table.highlighter.HighlightPredicate;
+import com.revolsys.swing.table.highlighter.Highlighter;
 import com.revolsys.swing.table.highlighter.OutsideBorderHighlighter;
 
 public class FunctionHighlighter implements HighlightPredicate {
 
-  public static Highlighter color(final BiFunction<Component, ComponentAdapter, Boolean> function,
+  public static Highlighter color(final TriFunction<JTable, Integer, Integer, Boolean> function,
     final Color cellBackground, final Color cellForeground, final Color selectedBackground,
     final Color selectedForeground) {
     final HighlightPredicate predicate = new FunctionHighlighter(function);
@@ -22,23 +23,26 @@ public class FunctionHighlighter implements HighlightPredicate {
       selectedForeground);
   }
 
-  public static Highlighter outsideBorder(
-    final BiFunction<Component, ComponentAdapter, Boolean> function, final Color color,
+  public static Highlighter outsideBorder(final JTable table,
+    final TriFunction<JTable, Integer, Integer, Boolean> function, final Color color,
     final int thickness) {
+
     final HighlightPredicate predicate = new FunctionHighlighter(function);
-    return new OutsideBorderHighlighter(predicate, color, thickness, true, false);
+    return new OutsideBorderHighlighter(predicate, table, color, thickness, true, false);
   }
 
-  private final BiFunction<Component, ComponentAdapter, Boolean> function;
+  private final TriFunction<JTable, Integer, Integer, Boolean> function;
 
-  public FunctionHighlighter(final BiFunction<Component, ComponentAdapter, Boolean> function) {
+  public FunctionHighlighter(final TriFunction<JTable, Integer, Integer, Boolean> function) {
     this.function = function;
   }
 
   @Override
-  public boolean isHighlighted(final Component renderer, final ComponentAdapter adapter) {
+  public boolean isHighlighted(final Component renderer, final JTable table, final int viewRow,
+    final int viewColumn) {
+
     try {
-      return this.function.apply(renderer, adapter);
+      return this.function.apply(table, viewRow, viewColumn);
     } catch (final Throwable e) {
       Logs.debug(this, "Error in highlighter", e);
       return false;

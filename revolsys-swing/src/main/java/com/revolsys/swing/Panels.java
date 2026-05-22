@@ -6,9 +6,8 @@ import java.awt.LayoutManager;
 import javax.swing.JPanel;
 import javax.swing.SpringLayout;
 
-import org.jdesktop.swingx.VerticalLayout;
-
 public interface Panels {
+
   static JPanel titledTransparent(final LayoutManager layout, final String title) {
     final JPanel panel = transparent(layout);
     Borders.titled(panel, title);
@@ -28,13 +27,20 @@ public interface Panels {
   }
 
   static JPanel titledTransparentVerticalLayout(final String title) {
-    final LayoutManager layout = new VerticalLayout();
-    return titledTransparent(layout, title);
+    final JPanel panel = new JPanel(new VerticalLayout());
+    panel.setOpaque(false);
+    Borders.titled(panel, title);
+    return panel;
+
+    // final LayoutManager layout = new VerticalLayout();
+    // return titledTransparent(layout, title);
   }
 
   static JPanel titledTransparentVerticalLayout(final String title, final int gap) {
-    final LayoutManager layout = new VerticalLayout(gap);
-    return titledTransparent(layout, title);
+    final JPanel panel = new JPanel(new VerticalLayout(gap));
+    panel.setOpaque(false);
+    Borders.titled(panel, title);
+    return panel;
   }
 
   static JPanel transparent(final LayoutManager layout) {
@@ -47,4 +53,5 @@ public interface Panels {
     final LayoutManager layout = new SpringLayout();
     return transparent(layout);
   }
+
 }

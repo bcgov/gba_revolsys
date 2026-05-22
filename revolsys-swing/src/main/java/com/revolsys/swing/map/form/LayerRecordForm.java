@@ -45,7 +45,6 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.undo.UndoableEdit;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.awt.WebColors;
 import org.jeometry.common.data.identifier.Identifier;
 import org.jeometry.common.data.type.DataType;
@@ -69,6 +68,7 @@ import com.revolsys.swing.Dialogs;
 import com.revolsys.swing.Panels;
 import com.revolsys.swing.SwingUtil;
 import com.revolsys.swing.TabbedPane;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.action.RunnableAction;
 import com.revolsys.swing.action.enablecheck.EnableCheck;
 import com.revolsys.swing.action.enablecheck.ObjectPropertyEnableCheck;

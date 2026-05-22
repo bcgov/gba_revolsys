@@ -19,12 +19,12 @@ import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.exception.Exceptions;
 
 import com.revolsys.swing.Dialogs;
 import com.revolsys.swing.Icons;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.action.RunnableAction;
 import com.revolsys.swing.field.Field;
 import com.revolsys.swing.field.FieldSupport;
@@ -68,7 +68,11 @@ public class ValueField extends JPanel implements Field {
   }
 
   public ValueField(final String fieldName, final Object fieldValue) {
-    this(new VerticalLayout(), fieldName, fieldValue);
+    super(true);
+    setLayout(new VerticalLayout());
+    setOpaque(false);
+    this.fieldSupport = new FieldSupport(this, fieldName, fieldValue, true);
+    setTitle(CaseConverter.toCapitalizedWords(fieldName));
   }
 
   public ValueField addLabelledComponent(final String label, final Component component) {

@@ -15,11 +15,11 @@ import org.jeometry.common.exception.Exceptions;
 import com.revolsys.properties.ObjectWithProperties;
 import com.revolsys.record.schema.RecordDefinition;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.field.Field;
 import com.revolsys.swing.map.layer.record.AbstractRecordLayer;
 import com.revolsys.swing.map.layer.record.RecordLayerProxy;
 import com.revolsys.swing.scripting.ScriptEngines;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.editor.BaseTableCellEditor;
 
 public interface RecordLayerFieldUiFactory extends RecordLayerProxy {

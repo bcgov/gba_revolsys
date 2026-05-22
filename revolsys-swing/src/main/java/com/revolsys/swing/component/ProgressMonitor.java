@@ -21,11 +21,11 @@ import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.logging.Logs;
 
 import com.revolsys.beans.PropertyChangeSupport;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.action.RunnableAction;
 import com.revolsys.swing.parallel.AbstractSwingWorker;
 import com.revolsys.swing.parallel.Invoke;

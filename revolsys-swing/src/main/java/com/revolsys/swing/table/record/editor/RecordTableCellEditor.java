@@ -17,10 +17,10 @@ import org.jeometry.common.awt.WebColors;
 import com.revolsys.record.schema.RecordDefinition;
 import com.revolsys.swing.SwingUtil;
 import com.revolsys.swing.field.AbstractRecordQueryField;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.field.Field;
 import com.revolsys.swing.field.TextField;
 import com.revolsys.swing.menu.ShowMenuMouseListener;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.editor.BaseTableCellEditor;
 import com.revolsys.swing.table.record.model.AbstractRecordTableModel;
 

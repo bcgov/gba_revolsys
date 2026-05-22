@@ -1,9 +1,9 @@
 package com.revolsys.swing.map.layer.record.table;
 
 import com.revolsys.record.schema.RecordDefinition;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.field.Field;
 import com.revolsys.swing.map.layer.record.AbstractRecordLayer;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.record.editor.RecordTableCellEditor;
 
 public class RecordLayerTableCellEditor extends RecordTableCellEditor {

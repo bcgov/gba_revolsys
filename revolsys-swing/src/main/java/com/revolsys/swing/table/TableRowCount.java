@@ -13,6 +13,8 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
+import com.revolsys.swing.field.BaseJTable;
+
 public class TableRowCount extends JLabel implements TableModelListener, PropertyChangeListener {
   private static final long serialVersionUID = 1L;
 

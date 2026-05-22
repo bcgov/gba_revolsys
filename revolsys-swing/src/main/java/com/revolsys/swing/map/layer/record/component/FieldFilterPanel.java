@@ -19,7 +19,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
-import org.jdesktop.swingx.JXSearchField;
 import org.jeometry.common.awt.WebColors;
 import org.jeometry.common.data.type.DataType;
 import org.jeometry.common.data.type.DataTypes;
@@ -47,6 +46,7 @@ import com.revolsys.swing.field.ComboBox;
 import com.revolsys.swing.field.DateField;
 import com.revolsys.swing.field.Field;
 import com.revolsys.swing.field.QueryWhereConditionField;
+import com.revolsys.swing.field.SearchField;
 import com.revolsys.swing.field.TextField;
 import com.revolsys.swing.layout.GroupLayouts;
 import com.revolsys.swing.map.layer.AbstractLayer;
@@ -212,8 +212,8 @@ public class FieldFilterPanel extends JComponent implements PropertyChangeListen
     if (component instanceof AbstractRecordQueryField) {
       final AbstractRecordQueryField queryField = (AbstractRecordQueryField)component;
       queryField.addPropertyChangeListener("selectedRecord", this);
-    } else if (component instanceof JXSearchField) {
-      final JXSearchField searchTextField = (JXSearchField)component;
+    } else if (component instanceof SearchField) {
+      final SearchField searchTextField = (SearchField)component;
       searchTextField.addActionListener(this.actionListener);
     } else if (component instanceof JTextComponent) {
       final JTextComponent searchTextField = (JTextComponent)component;
@@ -318,8 +318,8 @@ public class FieldFilterPanel extends JComponent implements PropertyChangeListen
     if (component instanceof AbstractRecordQueryField) {
       final AbstractRecordQueryField queryField = (AbstractRecordQueryField)component;
       queryField.removePropertyChangeListener("selectedRecord", this);
-    } else if (component instanceof JXSearchField) {
-      final JXSearchField searchTextField = (JXSearchField)component;
+    } else if (component instanceof SearchField) {
+      final SearchField searchTextField = (SearchField)component;
       searchTextField.removeActionListener(this.actionListener);
     } else if (component instanceof JComboBox) {
       final JComboBox comboField = (JComboBox)component;

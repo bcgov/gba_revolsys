@@ -28,12 +28,11 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JToggleButton;
-import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.undo.UndoableEdit;
 
-import org.jdesktop.swingx.JXBusyLabel;
 import org.jeometry.common.awt.WebColors;
 import org.jeometry.common.data.type.DataType;
 import org.jeometry.common.number.Doubles;
@@ -137,7 +136,7 @@ public class MapPanel extends JPanel implements GeometryFactoryProxy, PropertyCh
 
   private LayerMapOverlay baseMapOverlay;
 
-  private final JXBusyLabel busyLabel = new JXBusyLabel(new Dimension(100, 100));
+  private final JProgressBar busyLabel = new JProgressBar();
 
   private List<CloseLocation> closeSelectedLocations = Collections.emptyList();
 
@@ -231,10 +230,13 @@ public class MapPanel extends JPanel implements GeometryFactoryProxy, PropertyCh
 
     this.layeredPanel = new BasePanel(new GridLayout(1, 1), this.layeredPane);
 
-    this.busyLabel.setDelay(200);
-    this.busyLabel.setBusy(true);
-    this.busyLabel.setHorizontalAlignment(SwingConstants.CENTER);
-    this.busyLabel.setVerticalAlignment(SwingConstants.CENTER);
+    this.busyLabel.setPreferredSize(new Dimension(100, 100));
+    this.busyLabel.setIndeterminate(true);
+    this.busyLabel.putClientProperty("JProgressBar.style", "circular");
+    this.busyLabel.setPreferredSize(new Dimension(100, 100));
+    this.busyLabel.setVisible(true);
+    this.busyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    this.busyLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
     this.busyLabel.setBackground(WebColors.White);
     this.busyLabel.setOpaque(true);
     add(this.busyLabel, BorderLayout.CENTER);
@@ -1097,7 +1099,6 @@ public class MapPanel extends JPanel implements GeometryFactoryProxy, PropertyCh
       if (initializing != this.initializing) {
         this.initializing = initializing;
         if (initializing) {
-          this.busyLabel.setDelay(200);
           remove(this.layeredPanel);
           add(this.busyLabel, BorderLayout.CENTER);
         } else {

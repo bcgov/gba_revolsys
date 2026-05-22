@@ -3,26 +3,21 @@ package com.revolsys.swing.field;
 import java.awt.Color;
 
 import javax.swing.BorderFactory;
-import javax.swing.JColorChooser;
-
-import org.jdesktop.swingx.JXColorSelectionButton;
 
 import com.revolsys.swing.EventQueue;
-import com.revolsys.swing.component.ColorAlphaPanel;
+import com.revolsys.swing.component.ColorSelectionButton;
 import com.revolsys.swing.component.ValueField;
 
 public class ColorChooserField extends ValueField {
   private static final long serialVersionUID = 1L;
 
-  private final JXColorSelectionButton colorButton = new JXColorSelectionButton();
+  private final ColorSelectionButton colorButton = new ColorSelectionButton();
 
   public ColorChooserField(final String fieldName, final Color color) {
     super(fieldName, color);
     EventQueue.addPropertyChange(this.colorButton, "background", () -> updateFieldValue());
     setBorder(BorderFactory.createEmptyBorder(0, 3, 3, 0));
     add(this.colorButton);
-    final JColorChooser chooser = this.colorButton.getChooser();
-    chooser.addChooserPanel(new ColorAlphaPanel());
     setFieldValue(color);
   }
 

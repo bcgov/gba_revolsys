@@ -25,7 +25,9 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
@@ -38,13 +40,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.Document;
 
-import org.jdesktop.swingx.JXBusyLabel;
-import org.jdesktop.swingx.JXList;
-import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.ComponentAdapter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
-import org.jeometry.common.awt.WebColors;
 import org.jeometry.common.collection.map.LruMap;
 import org.jeometry.common.data.identifier.Identifier;
 import org.jeometry.common.data.type.DataType;
@@ -79,12 +74,13 @@ import com.revolsys.value.ThreadBooleanValue;
 
 public abstract class AbstractRecordQueryField extends ValueField
   implements DocumentListener, KeyListener, MouseListener, FocusListener, ListDataListener,
-  ListSelectionListener, HighlightPredicate, ActionListenable {
+  ListSelectionListener, ActionListenable {
+
   private static final Icon ICON_DELETE = Icons.getIcon("delete");
 
   private static final long serialVersionUID = 1L;
 
-  private final JXBusyLabel busyLabel = new JXBusyLabel(new Dimension(16, 16));
+  private final JProgressBar busyLabel = new JProgressBar();
 
   private final FieldDefinition displayField;
 
@@ -92,7 +88,7 @@ public abstract class AbstractRecordQueryField extends ValueField
 
   private final Map<Identifier, String> idToDisplayMap = new LruMap<>(100);
 
-  private final JXList list;
+  private final JList<Record> list;
 
   private final ArrayListModel<Record> listModel = new ArrayListModel<>();
 
@@ -139,14 +135,12 @@ public abstract class AbstractRecordQueryField extends ValueField
     this.oldValueItem.setHorizontalAlignment(SwingConstants.LEFT);
     this.menu.add(this.oldValueItem, BorderLayout.NORTH);
 
-    this.list = new JXList(this.listModel);
-    this.list.setCellRenderer(new RecordListCellRenderer(displayField.getName()));
+    this.list = new JList<>(this.listModel);
+    this.list.setCellRenderer(new RecordListCellRenderer(displayField.getName(), this.searchField));
     this.list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    this.list.setHighlighters(HighlighterFactory.createSimpleStriping(Color.LIGHT_GRAY));
     this.list.addMouseListener(this);
     this.listModel.addListDataListener(this);
     this.list.addListSelectionListener(this);
-    this.list.addHighlighter(new ColorHighlighter(this, WebColors.Blue, WebColors.White));
 
     this.menu.add(new JScrollPane(this.list), BorderLayout.CENTER);
     this.menu.setFocusable(false);
@@ -159,8 +153,13 @@ public abstract class AbstractRecordQueryField extends ValueField
     MenuFactory.getPopupMenuFactory(this.searchField);
     this.searchField.setPreferredSize(new Dimension(100, 20));
     add(this.searchField);
+
+    this.busyLabel.setIndeterminate(true);
+    this.busyLabel.putClientProperty("JProgressBar.style", "circular");
+    this.busyLabel.setPreferredSize(new Dimension(16, 16));
     this.busyLabel.setVisible(false);
     add(this.busyLabel);
+
     GroupLayouts.makeColumns(this, false);
   }
 
@@ -299,18 +298,6 @@ public abstract class AbstractRecordQueryField extends ValueField
   @Override
   public boolean isFieldValid() {
     return true;
-  }
-
-  @Override
-  public boolean isHighlighted(final Component renderer, final ComponentAdapter adapter) {
-    final Record object = this.listModel.getElementAt(adapter.row);
-    final String text = this.searchField.getText();
-    final String value = object.getString(this.displayField);
-    if (DataType.equal(text, value)) {
-      return true;
-    } else {
-      return false;
-    }
   }
 
   @Override
@@ -467,7 +454,6 @@ public abstract class AbstractRecordQueryField extends ValueField
       if (Property.hasValue(queryText)) {
         if (queryText.length() >= this.minSearchCharacters) {
           this.searchField.setFieldValid();
-          this.busyLabel.setBusy(true);
           this.busyLabel.setVisible(true);
           final int searchIndex = this.searchIndex.incrementAndGet();
           Invoke.background("search", () -> queryDo(searchIndex, queryText));
@@ -541,7 +527,6 @@ public abstract class AbstractRecordQueryField extends ValueField
 
     Invoke.later(() -> {
       if (searchIndex == this.searchIndex.get()) {
-        this.busyLabel.setBusy(false);
         this.busyLabel.setVisible(false);
         this.listModel.setAll(records);
         if (isShowing()) {
@@ -597,7 +582,7 @@ public abstract class AbstractRecordQueryField extends ValueField
     if (!e.getValueIsAdjusting() && this.eventsEnabled.isTrue()) {
       try (
         final BaseCloseable eventsEnabled = eventsDisabled()) {
-        final Record record = (Record)this.list.getSelectedValue();
+        final Record record = this.list.getSelectedValue();
         if (record != null) {
           setSelectedRecord(record);
           final Identifier identifier = record.getIdentifier();

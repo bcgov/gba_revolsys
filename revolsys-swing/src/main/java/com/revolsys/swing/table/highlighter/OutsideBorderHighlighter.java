@@ -5,13 +5,10 @@ import java.awt.Component;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JTable;
 import javax.swing.border.Border;
 
-import org.jdesktop.swingx.decorator.AbstractHighlighter;
-import org.jdesktop.swingx.decorator.ComponentAdapter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-
-public class OutsideBorderHighlighter extends AbstractHighlighter {
+public class OutsideBorderHighlighter implements Highlighter {
 
   private final Border bottomBorder;
 
@@ -23,9 +20,14 @@ public class OutsideBorderHighlighter extends AbstractHighlighter {
 
   private final Border topBorder;
 
-  public OutsideBorderHighlighter(final HighlightPredicate predicate, final Color color,
-    final int thickness, final boolean compound, final boolean inner) {
-    super(predicate);
+  private final HighlightPredicate predicate;
+
+  private final JTable table;
+
+  public OutsideBorderHighlighter(final HighlightPredicate predicate, final JTable table,
+    final Color color, final int thickness, final boolean compound, final boolean inner) {
+    this.predicate = predicate;
+    this.table = table;
     this.topBorder = BorderFactory.createMatteBorder(thickness, thickness, 0, thickness, color);
     this.middleBorder = BorderFactory.createMatteBorder(0, thickness, 0, thickness, color);
     this.bottomBorder = BorderFactory.createMatteBorder(0, thickness, thickness, thickness, color);
@@ -34,30 +36,32 @@ public class OutsideBorderHighlighter extends AbstractHighlighter {
   }
 
   @Override
-  protected boolean canHighlight(final Component component, final ComponentAdapter adapter) {
-    return component instanceof JComponent;
-  }
+  public Component highlight(final Component renderer, final JTable table, final int viewRow,
+    final int viewColumn) {
+    if (!(renderer instanceof JComponent)) {
+      return renderer;
+    }
+    if (this.predicate != null
+      && !this.predicate.isHighlighted(renderer, table, viewRow, viewColumn)) {
+      return renderer;
+    }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  protected Component doHighlight(final Component renderer, final ComponentAdapter adapter) {
+    final int rowCount = this.table.getRowCount();
     Border border;
-    if (adapter.row == 0) {
+    if (viewRow == 0) {
       border = this.topBorder;
-    } else if (adapter.row == adapter.getRowCount() - 1) {
+    } else if (viewRow == rowCount - 1) {
       border = this.bottomBorder;
     } else {
       border = this.middleBorder;
     }
+
     final JComponent component = (JComponent)renderer;
     final Border componentBorder = component.getBorder();
-    if (this.compound) {
-      if (componentBorder != null) {
-        if (this.inner) {
-          border = BorderFactory.createCompoundBorder(componentBorder, border);
-        }
+    if (this.compound && componentBorder != null) {
+      if (this.inner) {
+        border = BorderFactory.createCompoundBorder(componentBorder, border);
+      } else {
         border = BorderFactory.createCompoundBorder(border, componentBorder);
       }
     }

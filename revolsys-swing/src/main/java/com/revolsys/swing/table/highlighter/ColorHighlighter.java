@@ -3,11 +3,12 @@ package com.revolsys.swing.table.highlighter;
 import java.awt.Color;
 import java.awt.Component;
 
-import org.jdesktop.swingx.decorator.AbstractHighlighter;
-import org.jdesktop.swingx.decorator.ComponentAdapter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
+import javax.swing.JTable;
 
-public class ColorHighlighter extends AbstractHighlighter {
+public class ColorHighlighter implements SelectedHighlighter {
+
+  private final HighlightPredicate predicate;
+
   private final Color background;
 
   private final Color foreground;
@@ -40,24 +41,50 @@ public class ColorHighlighter extends AbstractHighlighter {
 
   public ColorHighlighter(final HighlightPredicate predicate, final Color cellBackground,
     final Color cellForeground, final Color selectedBackground, final Color selectedForeground) {
-    super(predicate);
     this.background = cellBackground;
     this.foreground = cellForeground;
     this.selectedBackground = selectedBackground;
     this.selectedForeground = selectedForeground;
+    this.predicate = predicate;
   }
 
   @Override
-  protected Component doHighlight(final Component renderer, final ComponentAdapter adapter) {
-    final boolean selected = adapter.isSelected();
-    if (selected) {
-      renderer.setBackground(this.selectedBackground);
-      renderer.setForeground(this.selectedForeground);
-    } else {
-      renderer.setBackground(this.background);
-      renderer.setForeground(this.foreground);
+  public Component highlight(final Component renderer, final JTable table, final int viewRow,
+    final int viewColumn) {
+    // predicate == null means always apply
+    if (this.predicate != null
+      && !this.predicate.isHighlighted(renderer, table, viewRow, viewColumn)) {
+      return renderer;
     }
     return renderer;
   }
 
+  /**
+   * Called from BaseJTable.prepareRenderer which has isSelected context.
+   * Replaces doHighlight(renderer, adapter) where adapter.isSelected() was used.
+   */
+  @Override
+  public Component highlight(final Component renderer, final JTable table, final int viewRow,
+    final int viewColumn, final boolean isSelected) {
+    if (this.predicate != null
+      && !this.predicate.isHighlighted(renderer, table, viewRow, viewColumn)) {
+      return renderer;
+    }
+    if (isSelected) {
+      if (this.selectedBackground != null) {
+        renderer.setBackground(this.selectedBackground);
+      }
+      if (this.selectedForeground != null) {
+        renderer.setForeground(this.selectedForeground);
+      }
+    } else {
+      if (this.background != null) {
+        renderer.setBackground(this.background);
+      }
+      if (this.foreground != null) {
+        renderer.setForeground(this.foreground);
+      }
+    }
+    return renderer;
+  }
 }

@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
+import javax.swing.JComponent;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import org.jeometry.common.data.type.DataType;
@@ -50,6 +52,9 @@ public class TextArea extends JTextArea implements Field, FocusListener {
     MenuFactory.getPopupMenuFactory(this);
     setRows(rows);
     setColumns(columns);
+
+    setWrapStyleWord(true);
+    setLineWrap(true);
   }
 
   @Override
@@ -91,6 +96,14 @@ public class TextArea extends JTextArea implements Field, FocusListener {
   @Override
   public <T> T getFieldValue() {
     return (T)getText();
+  }
+
+  public JComponent scroll() {
+    final JScrollPane scrollPane = new JScrollPane(this);
+    // scrollPane.setPreferredSize(new Dimension(400, 100)); // width, height
+    scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+    scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    return scrollPane;
   }
 
   @Override

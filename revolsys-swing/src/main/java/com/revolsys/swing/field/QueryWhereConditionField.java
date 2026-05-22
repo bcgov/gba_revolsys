@@ -34,7 +34,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.awt.WebColors;
 import org.jeometry.common.data.identifier.Identifier;
 import org.jeometry.common.data.type.DataType;
@@ -51,6 +50,7 @@ import com.revolsys.record.schema.FieldDefinition;
 import com.revolsys.record.schema.RecordDefinition;
 import com.revolsys.swing.Borders;
 import com.revolsys.swing.Dialogs;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.action.enablecheck.EnableCheck;
 import com.revolsys.swing.action.enablecheck.ObjectPropertyEnableCheck;
 import com.revolsys.swing.component.BasePanel;
@@ -171,7 +171,7 @@ public class QueryWhereConditionField extends ValueField
     buttonsToolBar.addButton("math", "*", () -> insertText("*")).setBorderPainted(true);
     buttonsToolBar.addButton("math", "/", () -> insertText("/")).setBorderPainted(true);
 
-    final BasePanel widgetPanel = new BasePanel(new VerticalLayout(5), //
+    final BasePanel widgetPanel = new BasePanel(new VerticalLayout(5),
       GroupLayouts.panelColumns(this.fieldNamesList), //
       operatorToolBar, //
       this.searchFieldPanel, //

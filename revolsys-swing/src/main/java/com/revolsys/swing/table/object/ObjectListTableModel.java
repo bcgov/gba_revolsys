@@ -162,6 +162,9 @@ public class ObjectListTableModel<T> extends AbstractTableModel
 
   @Override
   public int getRowCount() {
+    if (this.objects == null) {
+      return 0;
+    }
     return this.objects.size();
   }
 

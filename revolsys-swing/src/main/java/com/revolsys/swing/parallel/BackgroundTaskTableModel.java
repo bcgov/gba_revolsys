@@ -18,20 +18,20 @@ import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker.StateValue;
 import javax.swing.Timer;
+import javax.swing.table.TableColumn;
 
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.table.TableColumnExt;
 import org.jeometry.common.awt.WebColors;
 
 import com.revolsys.beans.PropertyChangeSupport;
 import com.revolsys.swing.SwingUtil;
 import com.revolsys.swing.TabbedPane;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.menu.BaseJPopupMenu;
 import com.revolsys.swing.menu.MenuFactory;
 import com.revolsys.swing.table.AbstractTableModel;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.TablePanel;
 import com.revolsys.swing.table.highlighter.ColorHighlighter;
+import com.revolsys.swing.table.highlighter.HighlightPredicate;
 
 public class BackgroundTaskTableModel extends AbstractTableModel implements PropertyChangeListener {
   private static final long serialVersionUID = 1L;
@@ -57,8 +57,8 @@ public class BackgroundTaskTableModel extends AbstractTableModel implements Prop
 
   private static void addHighlighter(final BaseJTable table, final BackgroundTaskTableModel model,
     final StateValue state, final Color background, final Color foreground) {
-    final HighlightPredicate predicate = (renderer, adapter) -> {
-      final int rowIndex = adapter.convertRowIndexToModel(adapter.row);
+    final HighlightPredicate predicate = (renderer, ptable, viewRow, viewColumn) -> {
+      final int rowIndex = ptable.convertRowIndexToModel(viewRow);
       final BackgroundTask task = model.tasks.get(rowIndex);
       return task.getTaskStatus() == state;
     };
@@ -99,7 +99,7 @@ public class BackgroundTaskTableModel extends AbstractTableModel implements Prop
     table.setAutoCreateColumnsFromModel(false);
 
     for (int i = 0; i < model.getColumnCount(); i++) {
-      final TableColumnExt column = table.getColumnExt(i);
+      final TableColumn column = table.getColumnModel().getColumn(i);
       if (i == 1 || i == 2) {
         column.setMinWidth(200);
         column.setPreferredWidth(300);

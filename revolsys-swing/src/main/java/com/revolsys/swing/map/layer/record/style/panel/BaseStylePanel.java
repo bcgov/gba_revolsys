@@ -23,7 +23,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.coordinatesystem.model.unit.CustomUnits;
 
 import com.revolsys.geometry.model.LineCap;
@@ -31,6 +30,7 @@ import com.revolsys.geometry.model.LineJoin;
 import com.revolsys.swing.Icons;
 import com.revolsys.swing.Panels;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.action.I18nAction;
 import com.revolsys.swing.component.Form;
 import com.revolsys.swing.component.TogglePanel;
@@ -104,6 +104,7 @@ public class BaseStylePanel extends Form implements PropertyChangeListener {
 
   public BaseStylePanel(final LayerRenderer<?> renderer, final boolean showScaleFields) {
     super(new VerticalLayout());
+
     this.renderer = renderer;
     addReadOnlyFieldName("type");
     Property.addListener(renderer, this);

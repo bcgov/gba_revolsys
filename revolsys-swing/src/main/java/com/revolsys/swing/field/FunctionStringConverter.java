@@ -8,7 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
-import org.jdesktop.swingx.autocomplete.ObjectToStringConverter;
+import com.revolsys.swing.component.ObjectToStringConverter;
 
 public class FunctionStringConverter<T> extends ObjectToStringConverter
   implements ListCellRenderer<T> {

@@ -5,16 +5,17 @@ import java.awt.Component;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 
-import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.ComponentAdapter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
+import javax.swing.JTable;
+
 import org.jeometry.common.awt.WebColors;
 import org.jeometry.common.data.identifier.SingleIdentifier;
 import org.jeometry.common.data.type.DataType;
 
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.map.form.LayerRecordForm;
 import com.revolsys.swing.map.layer.record.table.model.LayerRecordTableModel;
-import com.revolsys.swing.table.BaseJTable;
+import com.revolsys.swing.table.highlighter.ColorHighlighter;
+import com.revolsys.swing.table.highlighter.HighlightPredicate;
 import com.revolsys.util.Property;
 
 public class FormAllFieldsModifiedPredicate implements HighlightPredicate {
@@ -24,12 +25,12 @@ public class FormAllFieldsModifiedPredicate implements HighlightPredicate {
     final FormAllFieldsModifiedPredicate predicate = new FormAllFieldsModifiedPredicate(form,
       model);
     table.addHighlighter(
-      new ColorHighlighter(new AndHighlightPredicate(predicate, HighlightPredicate.EVEN),
+      new ColorHighlighter(HighlightPredicate.and(predicate, HighlightPredicate.EVEN),
         WebColors.newAlpha(WebColors.YellowGreen, 127), WebColors.Black, WebColors.LimeGreen,
         Color.WHITE));
 
     table.addHighlighter(
-      new ColorHighlighter(new AndHighlightPredicate(predicate, HighlightPredicate.ODD),
+      new ColorHighlighter(HighlightPredicate.and(predicate, HighlightPredicate.ODD),
         WebColors.YellowGreen, WebColors.Black, WebColors.Green, Color.WHITE));
   }
 
@@ -44,9 +45,10 @@ public class FormAllFieldsModifiedPredicate implements HighlightPredicate {
   }
 
   @Override
-  public boolean isHighlighted(final Component renderer, final ComponentAdapter adapter) {
+  public boolean isHighlighted(final Component renderer, final JTable table, final int viewRow,
+    final int viewColumn) {
     try {
-      final int rowIndex = adapter.convertRowIndexToModel(adapter.row);
+      final int rowIndex = table.convertRowIndexToModel(viewRow);
       final String fieldName = this.model.getColumnFieldName(rowIndex);
       if (fieldName != null) {
         final LayerRecordForm form = this.form.get();

@@ -10,8 +10,8 @@ import javax.swing.JTable;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 
-import org.jdesktop.swingx.table.TableColumnExt;
 import org.jeometry.common.compare.NumericComparator;
 import org.jeometry.common.data.identifier.Code;
 import org.jeometry.common.data.identifier.Identifier;
@@ -23,9 +23,9 @@ import com.revolsys.record.code.CodeTable;
 import com.revolsys.record.io.format.json.JsonObject;
 import com.revolsys.record.schema.FieldDefinition;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.parallel.Invoke;
 import com.revolsys.swing.table.AbstractTableModel;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.editor.BaseTableCellEditor;
 import com.revolsys.util.Strings;
 
@@ -174,13 +174,13 @@ public class JsonObjectTableModel extends AbstractTableModel
     final JsonObjectTableCellRenderer cellRenderer = new JsonObjectTableCellRenderer();
 
     for (int i = 0; i < 3; i++) {
-      final TableColumnExt column = table.getColumnExt(i);
+      final TableColumn column = table.getColumnModel().getColumn(i);
       column.setCellRenderer(cellRenderer);
       if (i == 0) {
         column.setMinWidth(40);
         column.setPreferredWidth(40);
         column.setMaxWidth(40);
-        column.setComparator(new NumericComparator<>());
+        table.setColumnComparator(i, new NumericComparator<>());
       } else if (i == 1) {
         column.setPreferredWidth(150);
       } else {

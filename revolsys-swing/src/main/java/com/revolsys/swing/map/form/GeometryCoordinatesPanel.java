@@ -15,7 +15,7 @@ import javax.swing.table.TableColumnModel;
 
 import com.revolsys.geometry.model.Geometry;
 import com.revolsys.swing.component.ValueField;
-import com.revolsys.swing.table.BaseJTable;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.table.TablePanel;
 import com.revolsys.swing.table.editor.BaseTableCellEditor;
 import com.revolsys.swing.table.geometry.GeometryCoordinatesTableModel;
@@ -101,7 +101,7 @@ public class GeometryCoordinatesPanel extends ValueField implements TableModelLi
   public void tableChanged(final TableModelEvent e) {
     for (int columnIndex = 0; columnIndex < this.model.getColumnCount(); columnIndex++) {
       int width;
-      final TableColumn column = this.table.getColumn(columnIndex);
+      final TableColumn column = this.table.getColumnModel().getColumn(columnIndex);
       if (columnIndex < this.model.getNumIndexItems()) {
 
         width = (int)Math.ceil(Math.log10(this.model.getRowCount())) * 20;

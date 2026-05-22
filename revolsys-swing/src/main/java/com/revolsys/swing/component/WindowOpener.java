@@ -10,10 +10,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
-
-import org.jdesktop.swingx.JXBusyLabel;
 
 import com.revolsys.swing.SwingUtil;
 import com.revolsys.swing.layout.GroupLayouts;
@@ -38,9 +37,10 @@ public class WindowOpener extends JFrame implements WindowListener {
     final JPanel panel = new JPanel(new BorderLayout());
     setContentPane(panel);
     panel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
-    final JXBusyLabel busyLabel = new JXBusyLabel(new Dimension(16, 16));
-    busyLabel.setBusy(true);
-    panel.add(busyLabel);
+    final JProgressBar busyLabel = new JProgressBar();
+    busyLabel.setIndeterminate(true);
+    busyLabel.putClientProperty("JProgressBar.style", "circular");
+    busyLabel.setPreferredSize(new Dimension(16, 16));
     panel.add(new JLabel(message));
 
     GroupLayouts.makeColumns(LayoutStyle.getInstance(), panel, 2);

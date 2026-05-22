@@ -3,7 +3,7 @@ package com.revolsys.swing.table.record.model;
 import java.util.Map;
 
 import com.revolsys.record.schema.RecordDefinition;
-import com.revolsys.swing.table.BaseJTable;
+import com.revolsys.swing.field.BaseJTable;
 
 public class RecordMapTableModel extends AbstractSingleRecordTableModel {
 

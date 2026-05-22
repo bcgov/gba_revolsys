@@ -14,6 +14,7 @@ import java.util.EventObject;
 import java.util.Map;
 
 import javax.swing.JComponent;
+import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
@@ -21,17 +22,13 @@ import javax.swing.RowSorter;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
+import javax.swing.event.TableColumnModelListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import org.jdesktop.swingx.decorator.ComponentAdapter;
-import org.jdesktop.swingx.decorator.FontHighlighter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.event.TableColumnModelExtListener;
-import org.jdesktop.swingx.table.TableColumnExt;
-import org.jdesktop.swingx.table.TableColumnModelExt;
 import org.jeometry.common.awt.WebColors;
 
 import com.revolsys.geometry.model.Geometry;
@@ -45,16 +42,20 @@ import com.revolsys.swing.map.layer.record.LayerRecord;
 import com.revolsys.swing.map.layer.record.table.model.RecordLayerTableModel;
 import com.revolsys.swing.table.TablePanel;
 import com.revolsys.swing.table.editor.BaseTableCellEditor;
+import com.revolsys.swing.table.highlighter.FontHighlighter;
+import com.revolsys.swing.table.highlighter.HighlightPredicate;
 import com.revolsys.swing.table.highlighter.OddEvenColorHighlighter;
 import com.revolsys.swing.table.record.RecordRowTable;
 import com.revolsys.swing.table.record.editor.RecordTableCellEditor;
 import com.revolsys.swing.table.record.model.RecordRowTableModel;
 
 public class RecordLayerTable extends RecordRowTable {
-  private final class ColumnWidthListener implements TableColumnModelExtListener {
+  private final class ColumnWidthListener implements TableColumnModelListener {
 
     @Override
     public void columnAdded(final TableColumnModelEvent e) {
+      final TableColumn column = getColumnModel().getColumn(e.getToIndex());
+      column.addPropertyChangeListener(this::columnPropertyChange);
     }
 
     @Override
@@ -65,15 +66,14 @@ public class RecordLayerTable extends RecordRowTable {
     public void columnMoved(final TableColumnModelEvent e) {
     }
 
-    @Override
     public void columnPropertyChange(final PropertyChangeEvent event) {
       final Object source = event.getSource();
-      if (source instanceof TableColumnExt) {
+      if (source instanceof TableColumn) {
         if ("width".equals(event.getPropertyName())) {
           final AbstractRecordLayer layer = getLayer();
           if (layer != null) {
             if (!isInitializingColumnWidths()) {
-              final TableColumnExt column = (TableColumnExt)source;
+              final TableColumn column = (TableColumn)source;
               final int columnIndex = column.getModelIndex();
               final String fieldName = getColumnFieldName(columnIndex);
               final int width = column.getWidth();
@@ -101,7 +101,7 @@ public class RecordLayerTable extends RecordRowTable {
     final JTableHeader tableHeader = getTableHeader();
     tableHeader.setReorderingAllowed(false);
 
-    final TableColumnModelExt columnModel = (TableColumnModelExt)getColumnModel();
+    final TableColumnModel columnModel = getColumnModel();
     columnModel.addColumnModelListener(new ColumnWidthListener());
     addNotQueryRecordHighlighter();
     initActionMap();
@@ -190,8 +190,9 @@ public class RecordLayerTable extends RecordRowTable {
       WebColors.LemonChiffon, WebColors.Gold) {
 
       @Override
-      protected Component doHighlight(final Component component, final ComponentAdapter adapter) {
-        super.doHighlight(component, adapter);
+      public Component highlight(final Component component, final JTable table, final int viewRow,
+        final int viewColumn) {
+        super.highlight(component, table, viewRow, viewColumn);
         component.setFont(font);
         return component;
       }
@@ -355,14 +356,16 @@ public class RecordLayerTable extends RecordRowTable {
       setSortable(false);
     }
     final RowFilter<RecordRowTableModel, Integer> rowFilter = model.getRowFilter();
-    final boolean filterChanged = getRowFilter() != rowFilter;
-    if (filterChanged) {
-      setRowFilter(null);
-    }
+
+    // TODO: EG - fix this
+    // final boolean filterChanged = getRowFilter() != rowFilter;
+    // if (filterChanged) {
+    // setRowFilter(null);
+    // }
     super.tableChangedDo(event);
-    if (filterChanged) {
-      setRowFilter(rowFilter);
-    }
+    // if (filterChanged) {
+    // setRowFilter(rowFilter);
+    // }
     repaint();
   }
 }

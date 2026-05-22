@@ -10,7 +10,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.logging.Logs;
 
 import com.revolsys.collection.SimpleValueHolder;
@@ -27,6 +26,7 @@ import com.revolsys.spring.resource.Resource;
 import com.revolsys.swing.Borders;
 import com.revolsys.swing.RsSwingServiceInitializer;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.action.RunnableAction;
 import com.revolsys.swing.action.enablecheck.EnableCheck;
 import com.revolsys.swing.component.BasePanel;
@@ -213,6 +213,7 @@ public class PointCloudLayer extends AbstractLayer {
 
     final ValueField propertiesPanel = new ValueField(this);
     propertiesPanel.setLayout(new VerticalLayout(5));
+
     Borders.titled(propertiesPanel, "Properties");
     generalPanel.add(propertiesPanel);
     final String propertiesHtml = this.pointCloud.toHtml();
@@ -232,6 +233,7 @@ public class PointCloudLayer extends AbstractLayer {
     scrollPane.setMaximumSize(new Dimension(1000, 350));
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     propertiesPanel.add(scrollPane);
+
     final SimpleValueHolder<JButton> buttonHolder = new SimpleValueHolder<>();
     final JButton refreshButton = RunnableAction.newButton("Update Classification Counts", () -> {
       buttonHolder.getValue().setEnabled(false);
@@ -243,6 +245,7 @@ public class PointCloudLayer extends AbstractLayer {
       });
     });
     propertiesPanel.add(refreshButton);
+
     buttonHolder.setValue(refreshButton);
     return generalPanel;
   }

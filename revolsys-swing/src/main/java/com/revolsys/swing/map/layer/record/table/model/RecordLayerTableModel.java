@@ -38,6 +38,7 @@ import com.revolsys.record.schema.FieldDefinition;
 import com.revolsys.record.schema.RecordDefinition;
 import com.revolsys.swing.EventQueue;
 import com.revolsys.swing.action.RunnableAction;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.listener.EventQueueRunnableListener;
 import com.revolsys.swing.map.layer.Project;
 import com.revolsys.swing.map.layer.record.AbstractRecordLayer;
@@ -47,7 +48,6 @@ import com.revolsys.swing.map.layer.record.table.RecordLayerTable;
 import com.revolsys.swing.menu.BaseJPopupMenu;
 import com.revolsys.swing.menu.MenuFactory;
 import com.revolsys.swing.parallel.Invoke;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.SortableTableModel;
 import com.revolsys.swing.table.editor.BaseTableCellEditor;
 import com.revolsys.swing.table.record.filter.RecordRowPredicateRowFilter;
@@ -719,6 +719,7 @@ public class RecordLayerTableModel extends RecordRowTableModel
 
         final boolean sortable = tableRecordsMode.isSortable();
         table.setSortable(sortable);
+
         table.setSortOrder(getColumnFieldsOffset(), SortOrder.ASCENDING);
 
         final RowFilter<RecordRowTableModel, Integer> rowFilter = getRowFilter();

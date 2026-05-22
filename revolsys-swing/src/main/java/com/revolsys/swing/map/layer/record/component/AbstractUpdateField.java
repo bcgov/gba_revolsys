@@ -17,12 +17,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.exception.WrappedException;
 
 import com.revolsys.record.schema.FieldDefinition;
 import com.revolsys.swing.Dialogs;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.action.RunnableAction;
 import com.revolsys.swing.action.enablecheck.EnableCheck;
 import com.revolsys.swing.component.BaseDialog;

@@ -25,11 +25,11 @@ import com.revolsys.swing.action.RunnableAction;
 import com.revolsys.swing.component.BaseDialog;
 import com.revolsys.swing.component.BasePanel;
 import com.revolsys.swing.component.ProgressMonitor;
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.map.layer.record.AbstractRecordLayer;
 import com.revolsys.swing.map.layer.record.LayerRecord;
 import com.revolsys.swing.map.layer.record.table.RecordLayerTableCellEditor;
 import com.revolsys.swing.menu.BaseJPopupMenu;
-import com.revolsys.swing.table.BaseJTable;
 import com.revolsys.swing.table.TablePanel;
 import com.revolsys.swing.table.lambda.column.ColumnBasedTableModel;
 import com.revolsys.swing.table.lambda.column.LayerRecordTableModelColumn;
@@ -188,10 +188,10 @@ public class MergeRecordsDialog extends BaseDialog {
   }
 
   private void newTableHighlighter(final BaseJTable table, final MergeableRecord mergeableRecord) {
-    table.addHighlighter((renderer, adaptor, fieldIndex, columnIndex) -> {
+    table.addHighlighter((renderer, ptable, fieldIndex, columnIndex) -> {
       if (columnIndex >= 3) {
-        final boolean selected = adaptor.isSelected();
-        final boolean even = adaptor.row % 2 == 0;
+        final boolean selected = table.getSelectedRow() == fieldIndex;
+        final boolean even = fieldIndex % 2 == 0;
         if (columnIndex == 3) {
           final MergeFieldMatchType rowMatchType = mergeableRecord.getMatchType(fieldIndex);
           rowMatchType.setColor(renderer, selected, even);

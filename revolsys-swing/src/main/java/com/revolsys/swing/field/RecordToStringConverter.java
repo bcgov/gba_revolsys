@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jdesktop.swingx.autocomplete.ObjectToStringConverter;
 import org.jeometry.common.data.identifier.Identifier;
 import org.jeometry.common.data.type.DataTypes;
 
 import com.revolsys.record.Record;
+import com.revolsys.swing.component.ObjectToStringConverter;
 import com.revolsys.util.Property;
 import com.revolsys.util.Strings;
 

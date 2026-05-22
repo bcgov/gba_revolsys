@@ -18,13 +18,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JTable;
 import javax.swing.WindowConstants;
 
-import org.jdesktop.swingx.VerticalLayout;
-import org.jdesktop.swingx.decorator.ComponentAdapter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.HighlightPredicate.AndHighlightPredicate;
-import org.jdesktop.swingx.decorator.Highlighter;
 import org.jeometry.common.awt.WebColors;
 
 import com.revolsys.beans.ObjectPropertyException;
@@ -33,12 +29,15 @@ import com.revolsys.record.schema.FieldDefinition;
 import com.revolsys.record.schema.RecordDefinition;
 import com.revolsys.swing.Dialogs;
 import com.revolsys.swing.SwingUtil;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.component.BasePanel;
 import com.revolsys.swing.map.layer.record.AbstractRecordLayer;
 import com.revolsys.swing.map.layer.record.LayerRecord;
 import com.revolsys.swing.parallel.Invoke;
 import com.revolsys.swing.table.TablePanel;
 import com.revolsys.swing.table.highlighter.ColorHighlighter;
+import com.revolsys.swing.table.highlighter.HighlightPredicate;
+import com.revolsys.swing.table.highlighter.Highlighter;
 import com.revolsys.swing.table.record.RecordRowTable;
 import com.revolsys.swing.table.record.model.RecordListTableModel;
 import com.revolsys.swing.toolbar.ToolBar;
@@ -163,11 +162,11 @@ public class RecordValidationDialog implements PropertyChangeListener, Closeable
     table.setSortable(true);
     table.resizeColumnsToContent();
 
-    final HighlightPredicate invalidFieldPredicate = (final Component renderer,
-      final ComponentAdapter adapter) -> {
+    final HighlightPredicate invalidFieldPredicate = (final Component renderer, final JTable ptable,
+      final int viewRow, final int viewColumn) -> {
       try {
-        final int rowIndex = adapter.convertRowIndexToModel(adapter.row);
-        final int columnIndex = adapter.convertColumnIndexToModel(adapter.column);
+        final int rowIndex = ptable.convertRowIndexToModel(viewRow);
+        final int columnIndex = ptable.convertColumnIndexToModel(viewColumn);
         final Map<String, String> fieldErrors = this.invalidRecordErrors.get(rowIndex);
         if (!fieldErrors.isEmpty()) {
           final String fieldName = this.layer.getFieldName(columnIndex);
@@ -186,10 +185,10 @@ public class RecordValidationDialog implements PropertyChangeListener, Closeable
       WebColors.newAlpha(Color.RED, 64), Color.RED, Color.RED, Color.YELLOW);
     table.addHighlighter(invalidFieldHighlighter);
 
-    final HighlightPredicate validRecordPredicate = (final Component renderer,
-      final ComponentAdapter adapter) -> {
+    final HighlightPredicate validRecordPredicate = (final Component renderer, final JTable ptable,
+      final int viewRow, final int viewColumn) -> {
       try {
-        final int rowIndex = adapter.convertRowIndexToModel(adapter.row);
+        final int rowIndex = ptable.convertRowIndexToModel(viewRow);
         final Map<String, String> fieldErrors = this.invalidRecordErrors.get(rowIndex);
         if (fieldErrors.isEmpty()) {
           return true;
@@ -199,12 +198,12 @@ public class RecordValidationDialog implements PropertyChangeListener, Closeable
       return false;
     };
     table.addHighlighter(
-      new ColorHighlighter(new AndHighlightPredicate(validRecordPredicate, HighlightPredicate.EVEN),
+      new ColorHighlighter(HighlightPredicate.and(validRecordPredicate, HighlightPredicate.EVEN),
         WebColors.newAlpha(WebColors.LimeGreen, 127), WebColors.Black,
         WebColors.newAlpha(WebColors.DarkGreen, 191), Color.WHITE));
 
     table.addHighlighter(
-      new ColorHighlighter(new AndHighlightPredicate(validRecordPredicate, HighlightPredicate.ODD),
+      new ColorHighlighter(HighlightPredicate.and(validRecordPredicate, HighlightPredicate.ODD),
         WebColors.LimeGreen, WebColors.Black, WebColors.DarkGreen, Color.WHITE));
 
     final TablePanel tablePanel = new TablePanel(table);

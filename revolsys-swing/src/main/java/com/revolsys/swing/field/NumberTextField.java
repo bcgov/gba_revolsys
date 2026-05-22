@@ -5,10 +5,10 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.math.BigDecimal;
 
+import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.jdesktop.swingx.JXTextField;
 import org.jeometry.common.awt.WebColors;
 import org.jeometry.common.data.type.DataType;
 import org.jeometry.common.data.type.DataTypes;
@@ -22,7 +22,7 @@ import com.revolsys.swing.menu.MenuFactory;
 import com.revolsys.swing.parallel.Invoke;
 import com.revolsys.util.Property;
 
-public class NumberTextField extends JXTextField implements Field, DocumentListener, FocusListener {
+public class NumberTextField extends JTextField implements Field, DocumentListener, FocusListener {
   private static final long serialVersionUID = 1L;
 
   private static int getLength(final DataType dataType, int length, final int scale,

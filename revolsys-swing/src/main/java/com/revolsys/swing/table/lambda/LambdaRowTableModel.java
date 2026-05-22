@@ -8,9 +8,9 @@ import java.util.function.Function;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 
+import com.revolsys.swing.field.BaseJTable;
 import com.revolsys.swing.menu.MenuFactory;
 import com.revolsys.swing.table.AbstractTableModel;
-import com.revolsys.swing.table.BaseJTable;
 
 public class LambdaRowTableModel<R> extends AbstractTableModel {
 
@@ -96,7 +96,7 @@ public class LambdaRowTableModel<R> extends AbstractTableModel {
 
   public void applyTableColumnSettings(final BaseJTable table) {
     for (int i = 0; i < this.columns.size(); i++) {
-      final TableColumn tableColumn = table.getColumnExt(i);
+      final TableColumn tableColumn = table.getColumnModel().getColumn(i);
       final LambdaTableModelColumn<R, ?> column = getColumn(i);
       column.applySettings(tableColumn);
     }

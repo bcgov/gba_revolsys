@@ -9,9 +9,9 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.awt.WebColors;
 
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.component.ValueField;
 import com.revolsys.swing.field.ComboBox;
 import com.revolsys.swing.map.layer.record.style.MarkerStyle;
@@ -45,8 +45,8 @@ public class MarkerField extends ValueField implements PropertyChangeListener {
     MarkerLibrary.getAllMarkers(), renderer);
 
   public MarkerField(final String fieldName, final Object fieldValue) {
-    super(fieldName, fieldValue);
-    setLayout(new VerticalLayout());
+    super(new VerticalLayout(), fieldName, fieldValue);
+
     add(this.comboBox);
     Property.addListener(this.comboBox, "marker", this);
     this.comboBox.setSelectedItem(fieldValue);

@@ -12,7 +12,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.awt.WebColors;
 import org.jeometry.common.data.type.DataTypes;
 
@@ -29,6 +28,7 @@ import com.revolsys.record.io.RecordStoreConnectionManager;
 import com.revolsys.record.io.RecordStoreConnectionRegistry;
 import com.revolsys.record.io.RecordStoreFactory;
 import com.revolsys.record.io.format.json.JsonObject;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.component.Form;
 import com.revolsys.swing.field.CheckBox;
 import com.revolsys.swing.field.ComboBox;
@@ -96,6 +96,7 @@ public final class RecordStoreConnectionForm extends Form {
   public RecordStoreConnectionForm(final RecordStoreConnectionRegistry registry,
     final RecordStoreConnection connection, Throwable exception) {
     super(new VerticalLayout());
+
     this.registry = registry;
     this.connection = connection;
     final Map<String, String> allConnectionUrlMap = new TreeMap<>();

@@ -10,12 +10,12 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jeometry.common.data.type.DataTypes;
 import org.jeometry.coordinatesystem.model.systems.EpsgId;
 
 import com.revolsys.geometry.model.GeometryFactory;
 import com.revolsys.geometry.model.GeometryFactoryProxy;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.component.BasePanel;
 import com.revolsys.swing.component.ValueField;
 import com.revolsys.swing.field.ArrayListComboBoxModel;
@@ -115,7 +115,7 @@ public class GeometryFactoryField extends BaseComboBox<Integer> implements ItemL
       valueField.setTitle("Select Coordinate System");
 
       {
-        final JPanel titlePanel = new JPanel(new VerticalLayout(3));
+        final JPanel titlePanel = new JPanel(new VerticalLayout());
         titlePanel.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
         titlePanel.add(new JLabel(title));
         valueField.add(titlePanel, BorderLayout.NORTH);

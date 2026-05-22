@@ -680,7 +680,8 @@ public interface SwingUtil {
 
   static DateField newDateField(final String fieldName) {
     final DateField dateField = new DateField(fieldName);
-    dateField.setFormats("yyyy-MM-dd", "yyyy/MM/dd", "yyyy-MMM-dd", "yyyy/MMM/dd");
+    // dateField.setFormats("yyyy-MM-dd", "yyyy/MM/dd", "yyyy-MMM-dd",
+    // "yyyy/MMM/dd");
     MenuFactory.getPopupMenuFactory(dateField.getEditor());
     return dateField;
   }
@@ -1108,4 +1109,5 @@ public interface SwingUtil {
     }
     return activeWindow;
   }
+
 }

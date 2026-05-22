@@ -3,11 +3,11 @@ package com.revolsys.swing.table.lambda;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
-import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 import org.jeometry.common.data.type.DataTypes;
 import org.jeometry.common.function.Consumer4;
 import org.jeometry.common.function.Function3;
@@ -138,7 +138,8 @@ public class LambdaTableModelColumn<R, V> {
   @SuppressWarnings("unchecked")
   public LambdaTableModelColumn<R, V> setAlignment(final int alignment) {
     if (this.cellRenderer == null) {
-      this.cellRenderer = new DefaultTableRenderer(null, alignment);
+      this.cellRenderer = new DefaultTableCellRenderer();
+      ((DefaultTableCellRenderer)this.cellRenderer).setHorizontalAlignment(alignment);
     } else if (this.cellRenderer instanceof LambdaCellRenderer) {
       LambdaCellRenderer<V> lambdaRenderer = (LambdaCellRenderer<V>)this.cellRenderer;
       final LambdaStringValue<V> renderFunction = lambdaRenderer.getRenderFunction();

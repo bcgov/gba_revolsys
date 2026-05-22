@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import org.jdesktop.swingx.VerticalLayout;
+import com.revolsys.swing.VerticalLayout;
 
 public class MultiTableCellRenderer implements TableCellRenderer, MouseListener {
 

@@ -8,11 +8,11 @@ import java.beans.PropertyChangeListener;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-import org.jdesktop.swingx.VerticalLayout;
-
 import com.revolsys.geometry.model.GeometryDataTypes;
 import com.revolsys.geometry.model.GeometryFactory;
 import com.revolsys.swing.Panels;
+import com.revolsys.swing.VerticalLayout;
+import com.revolsys.swing.component.BasePanel;
 import com.revolsys.swing.field.Field;
 import com.revolsys.swing.map.layer.record.style.GeometryStyle;
 import com.revolsys.swing.map.layer.record.style.TextStyle;
@@ -40,7 +40,7 @@ public class GridLayerStylePanel extends BaseStylePanel implements PropertyChang
 
     final JPanel panel = new JPanel(new BorderLayout());
     add(panel, 1);
-    final JPanel stylePanels = new JPanel(new VerticalLayout(5));
+    final JPanel stylePanels = new BasePanel(new VerticalLayout(5));
     panel.add(stylePanels, BorderLayout.CENTER);
 
     this.previews = Panels.titledTransparentVerticalLayout("Preview", 5);

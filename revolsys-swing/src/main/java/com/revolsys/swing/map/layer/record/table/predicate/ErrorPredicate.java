@@ -3,14 +3,15 @@ package com.revolsys.swing.map.layer.record.table.predicate;
 import java.awt.Color;
 import java.awt.Component;
 
-import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.ComponentAdapter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.Highlighter;
+import javax.swing.JTable;
+
 import org.jeometry.common.awt.WebColors;
 
 import com.revolsys.geometry.model.Geometry;
 import com.revolsys.record.Record;
+import com.revolsys.swing.table.highlighter.ColorHighlighter;
+import com.revolsys.swing.table.highlighter.HighlightPredicate;
+import com.revolsys.swing.table.highlighter.Highlighter;
 import com.revolsys.swing.table.record.RecordRowTable;
 import com.revolsys.swing.table.record.model.RecordRowTableModel;
 
@@ -55,12 +56,13 @@ public class ErrorPredicate implements HighlightPredicate {
   }
 
   @Override
-  public boolean isHighlighted(final Component renderer, final ComponentAdapter adapter) {
+  public boolean isHighlighted(final Component renderer, final JTable table, final int viewRow,
+    final int viewColumn) {
     try {
-      final int rowIndex = adapter.convertRowIndexToModel(adapter.row);
+      final int rowIndex = table.convertRowIndexToModel(viewRow);
       final Record record = this.model.getRecord(rowIndex);
       if (record != null) {
-        final int columnIndex = adapter.convertColumnIndexToModel(adapter.column);
+        final int columnIndex = table.convertColumnIndexToView(viewColumn);
         final Class<?> columnClass = this.model.getColumnClass(columnIndex);
         if (Geometry.class.isAssignableFrom(columnClass)) {
           return false;

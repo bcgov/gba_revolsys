@@ -7,8 +7,9 @@ import javax.swing.ComboBoxEditor;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import org.jdesktop.swingx.autocomplete.ObjectToStringConverter;
 import org.jeometry.common.data.type.DataTypes;
+
+import com.revolsys.swing.component.ObjectToStringConverter;
 
 public class SelectMapScaleEditor implements ComboBoxEditor {
   final ObjectToStringConverter stringConverter;

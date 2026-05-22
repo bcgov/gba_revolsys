@@ -7,7 +7,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jeometry.common.awt.WebColors;
 
 import com.revolsys.beans.ObjectPropertyException;
@@ -16,6 +15,7 @@ import com.revolsys.swing.map.layer.record.AbstractRecordLayer;
 import com.revolsys.swing.map.layer.record.LayerRecord;
 import com.revolsys.swing.table.SortableTableModel;
 import com.revolsys.swing.table.TablePanel;
+import com.revolsys.swing.table.highlighter.HighlightPredicate;
 import com.revolsys.swing.table.highlighter.OddEvenColorHighlighter;
 import com.revolsys.swing.table.record.RecordRowTable;
 import com.revolsys.swing.table.record.model.RecordListTableModel;
@@ -109,8 +109,8 @@ public class RecordLayerErrorsTableModel extends RecordListTableModel
     table.getSelectionModel().addListSelectionListener(this);
     table.resizeColumnsToContent();
 
-    final HighlightPredicate predicate = (renderer, adapter) -> {
-      final int columnIndex = adapter.convertColumnIndexToModel(adapter.column);
+    final HighlightPredicate predicate = (renderer, ptable, viewRow, viewColumn) -> {
+      final int columnIndex = table.convertColumnIndexToModel(viewColumn);
       return columnIndex == 0;
     };
     table.addHighlighter(new OddEvenColorHighlighter(predicate,

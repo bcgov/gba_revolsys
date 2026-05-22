@@ -1,6 +1,5 @@
 package com.revolsys.swing.field;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -9,22 +8,22 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 
-import org.jdesktop.swingx.HorizontalLayout;
-import org.jdesktop.swingx.JXList;
-import org.jdesktop.swingx.VerticalLayout;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.jeometry.common.data.type.DataType;
 
 import com.revolsys.swing.EventQueue;
+import com.revolsys.swing.HorizontalLayout;
+import com.revolsys.swing.VerticalLayout;
 import com.revolsys.swing.component.ValueField;
 import com.revolsys.swing.list.ArrayListModel;
 import com.revolsys.swing.listener.EventQueueRunnableListener;
+import com.revolsys.swing.map.list.StripedCellRenderer;
 import com.revolsys.swing.toolbar.ToolBar;
 import com.revolsys.util.Property;
 import com.revolsys.util.Strings;
@@ -44,10 +43,11 @@ public class StringListField extends ValueField {
 
   private final ArrayListModel<String> values = new ArrayListModel<>();
 
-  private final JXList valuesField;
+  private final JList<String> valuesField;
 
   public StringListField(final Comparator<String> comparator, final String fieldName) {
     super(new HorizontalLayout(2), fieldName, "");
+
     setOpaque(false);
     this.comparator = comparator;
 
@@ -69,13 +69,14 @@ public class StringListField extends ValueField {
     this.toolBar.addButtonTitleIcon(SELECTED, "Remove Selected", "delete",
       this::removeSelectedValues);
 
-    this.valuesField = new JXList(this.values);
+    this.valuesField = new JList<>(this.values);
     this.valuesField.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    this.valuesField.setHighlighters(HighlighterFactory.createSimpleStriping(Color.LIGHT_GRAY));
+    this.valuesField.setCellRenderer(new StripedCellRenderer());
 
     final JScrollPane namesPane = new JScrollPane(this.valuesField);
     namesPane.setPreferredSize(new Dimension(100, 3 * 20));
     fieldPanel.add(namesPane);
+
     updateFields();
 
     final EventQueueRunnableListener updateFieldListener = EventQueue.addDocument(this.valueEntry,
@@ -128,7 +129,7 @@ public class StringListField extends ValueField {
   }
 
   public String getSelected() {
-    return (String)this.valuesField.getSelectedValue();
+    return this.valuesField.getSelectedValue();
   }
 
   public ToolBar getToolBar() {
