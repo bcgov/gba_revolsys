@@ -7,13 +7,11 @@ import java.io.OutputStream;
 import org.apache.commons.imaging.AbstractImageParser;
 import org.jeometry.common.exception.Exceptions;
 
-import com.revolsys.io.AbstractWriter;
 import com.revolsys.raster.GeoreferencedImage;
 import com.revolsys.raster.GeoreferencedImageWriter;
 import com.revolsys.spring.resource.Resource;
 
-public class CommonsImagingGeoreferencedImageWriter extends AbstractWriter<GeoreferencedImage>
-  implements GeoreferencedImageWriter {
+public class CommonsImagingGeoreferencedImageWriter implements GeoreferencedImageWriter {
 
   private final Resource resource;
 
@@ -38,11 +36,7 @@ public class CommonsImagingGeoreferencedImageWriter extends AbstractWriter<Geore
         OutputStream out = resource.newBufferedOutputStream()) {
         image.writePrjFile(resource);
         GeoreferencedImageWriter.writeWorldFile(this.resource, this.worldFileExtension, image);
-        // this.imageParser.writeImage(bufferedImage, out, getProperties());
-        // TODO: do we need to convert properties here; maybe we remove
-        // properties so they don't accidently get used?
         this.imageParser.writeImage(bufferedImage, out, null);
-
       } catch (final IOException e) {
         throw Exceptions.wrap("Unable to write: " + resource, e);
       }

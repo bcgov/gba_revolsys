@@ -436,8 +436,6 @@
     <io.netty.version>4.2.13.Final</io.netty.version>
     <org.apache.xmlgraphics.batik.version>1.19</org.apache.xmlgraphics.batik.version>
     <org.apache.xmlgraphics.commons.version>2.11</org.apache.xmlgraphics.commons.version>
-    
-    
     <org.gdal.version>2.4.0</org.gdal.version>
   </properties>
 </project>
