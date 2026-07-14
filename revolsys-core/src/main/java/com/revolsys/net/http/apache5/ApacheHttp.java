@@ -5,8 +5,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javax.net.ssl.SSLContext;
+
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
@@ -14,6 +20,8 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.apache.hc.core5.ssl.TrustStrategy;
 import org.jeometry.common.exception.Exceptions;
 import org.jeometry.common.exception.WrappedException;
 
@@ -25,6 +33,8 @@ public class ApacheHttp {
 
   public static final ContentType XML = ContentType.create("application/xml",
     StandardCharsets.UTF_8);
+
+  private static TrustStrategy defaultTrustStrategy = TrustSelfSignedStrategy.INSTANCE;
 
   public static void execute(final ClassicHttpRequest request,
     final Consumer<ClassicHttpResponse> action) {
@@ -144,9 +154,35 @@ public class ApacheHttp {
   }
 
   public static CloseableHttpClient newClient() {
-    return HttpClientBuilder//
-      .create()
-      .build();
+    try {
+      final SSLContext sslContext = SSLContextBuilder.create()
+        .loadTrustMaterial(defaultTrustStrategy)
+        .build();
+
+      @SuppressWarnings("unused")
+      final DefaultClientTlsStrategy tlsStrategy = new DefaultClientTlsStrategy(sslContext,
+        (hostname, session) -> true);
+
+      final PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder
+        .create()
+        .setTlsSocketStrategy(tlsStrategy)
+        .build();
+
+      return HttpClientBuilder//
+        .create()
+        .setConnectionManager(connectionManager)
+        .build();
+    } catch (final Exception e) {
+      throw Exceptions.wrap(e);
+    }
+  }
+
+  public static void setDefaultTrustStrategy(final TrustStrategy defaultTrustStrategy) {
+    if (defaultTrustStrategy == null) {
+      ApacheHttp.defaultTrustStrategy = TrustSelfSignedStrategy.INSTANCE;
+    } else {
+      ApacheHttp.defaultTrustStrategy = defaultTrustStrategy;
+    }
   }
 
   public static ClassicRequestBuilder setJsonBody(final ClassicRequestBuilder requestBuilder,
