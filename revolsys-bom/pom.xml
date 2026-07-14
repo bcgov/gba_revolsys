@@ -425,7 +425,7 @@
   </dependencyManagement>
   <properties>
     <ch.qos.logback.version>1.5.32</ch.qos.logback.version>
-    <com.fasterxml.jackson.version>2.21.3</com.fasterxml.jackson.version>
+    <com.fasterxml.jackson.version>2.21.4</com.fasterxml.jackson.version>
     <org.apache.logging.log4j>2.26.0</org.apache.logging.log4j>
     <!-- latest version is 3.0.7, but docx4j-ImportXHTML-core uses 3.0.5 -->
     <org.apache.pdfbox.version>3.0.5</org.apache.pdfbox.version>
