@@ -22,10 +22,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.NameValuePair;
 import org.jeometry.common.exception.Exceptions;
 
 public class AzureSharedKeyRequestBuilder extends ApacheHttpRequestBuilder {
@@ -110,26 +110,28 @@ public class AzureSharedKeyRequestBuilder extends ApacheHttpRequestBuilder {
       data.append(NEWLINE);
 
       for (final String name : SHARED_KEY_HEADERS) {
-        Header header = getFirstHeader(name);
+        final Header header = getFirstHeader(name);
+        String value = null;
+
         if (header == null) {
           if ("Content-Type".equals(name)) {
             final HttpEntity entity = getEntity();
             if (entity != null) {
-              header = entity.getContentType();
+              value = entity.getContentType();
             }
           }
+        } else {
+          value = header.getValue();
         }
-        if (header != null) {
-          String value = header.getValue();
-          if (value != null) {
-            if ("Content-Type".equals(name)) {
-              if ("0".equals(value)) {
-                value = "";
-              }
+        if (value != null) {
+          if ("Content-Type".equals(name)) {
+            if ("0".equals(value)) {
+              value = "";
             }
-            data.append(value);
           }
+          data.append(value);
         }
+
         data.append(NEWLINE);
       }
       for (final String name : getHeaderNames()) {

@@ -44,7 +44,6 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NotExpression;
 import net.sf.jsqlparser.expression.NullValue;
-import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
 import net.sf.jsqlparser.expression.TimestampValue;
@@ -66,6 +65,7 @@ import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
@@ -81,8 +81,6 @@ public class JSqlParser extends AbstractSqlParser {
 
   public JSqlParser(final RecordDefinition recordDefinition) {
     super(recordDefinition);
-
-    this.converters.put(Parenthesis.class, this::convertParenthesis);
 
     this.converters.put(Addition.class, convertBinaryExpression(Add::new));
     this.converters.put(Subtraction.class, convertBinaryExpression(Subtract::new));
@@ -324,13 +322,6 @@ public class JSqlParser extends AbstractSqlParser {
     return Q.not(condition);
   }
 
-  private com.revolsys.record.query.Parenthesis convertParenthesis(final Expression expression) {
-    final Parenthesis castExpression = (Parenthesis)expression;
-    final Expression leftExpression = castExpression.getExpression();
-    final QueryValue leftValue = convertExpression(leftExpression);
-    return new com.revolsys.record.query.Parenthesis(leftValue);
-  }
-
   public <V extends QueryValue> V convertRightExpression(final BinaryExpression binaryExpression) {
     final Expression expression = binaryExpression.getRightExpression();
     return convertExpression(expression);
@@ -391,8 +382,8 @@ public class JSqlParser extends AbstractSqlParser {
         if (statement instanceof final Select select) {
           if (select instanceof final PlainSelect plainSelect) {
             final Expression where = plainSelect.getWhere();
-            if (where instanceof final Parenthesis parenthesis) {
-              final Expression expression = parenthesis.getExpression();
+            if (where instanceof final ParenthesedExpressionList<?> parenthesis) {
+              final Expression expression = parenthesis.get(0);
               return convertExpression(expression);
             }
           }

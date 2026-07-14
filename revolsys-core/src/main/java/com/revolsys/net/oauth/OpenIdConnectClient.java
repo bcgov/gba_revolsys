@@ -1,14 +1,15 @@
 package com.revolsys.net.oauth;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.function.Function;
 
-import org.apache.http.client.methods.RequestBuilder;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 
 import com.revolsys.io.map.ObjectFactoryConfig;
-import com.revolsys.net.http.ApacheHttp;
-import com.revolsys.net.http.ApacheHttpException;
+import com.revolsys.net.http.apache5.ApacheHttp;
+import com.revolsys.net.http.apache5.ApacheHttpException;
 import com.revolsys.net.http.exception.AuthenticationException;
 import com.revolsys.properties.BaseObjectWithProperties;
 import com.revolsys.record.io.format.json.JsonObject;
@@ -101,21 +102,21 @@ public class OpenIdConnectClient extends BaseObjectWithProperties {
     this.endSessionEndpoint = config.getString("end_session_endpoint");
   }
 
-  protected void addScopes(final RequestBuilder builder, final Collection<String> scopes) {
+  protected void addScopes(final ClassicRequestBuilder builder, final Collection<String> scopes) {
     final String scope = Strings.toString(" ", scopes);
     builder.addParameter("scope", scope);
   }
 
   public URI authorizationUrl(final String scope, final String redirectUri, final String state,
-    final String nonce, final String prompt) {
-    final RequestBuilder builder = authorizationUrlBuilder(scope, redirectUri, state, nonce,
+    final String nonce, final String prompt) throws URISyntaxException {
+    final ClassicRequestBuilder builder = authorizationUrlBuilder(scope, redirectUri, state, nonce,
       prompt);
-    return builder.build().getURI();
+    return builder.build().getUri();
   }
 
-  public RequestBuilder authorizationUrlBuilder(final String scope, final String redirectUri,
+  public ClassicRequestBuilder authorizationUrlBuilder(final String scope, final String redirectUri,
     final String state, final String nonce, final String prompt) {
-    final RequestBuilder builder = RequestBuilder//
+    final ClassicRequestBuilder builder = ClassicRequestBuilder//
       .get(this.authorizationEndpoint)
       .addParameter("response_type", "code")
       .addParameter("response_mode", "query")
@@ -135,7 +136,7 @@ public class OpenIdConnectClient extends BaseObjectWithProperties {
   }
 
   public DeviceCodeResponse deviceCode(final String scope) {
-    final RequestBuilder requestBuilder = RequestBuilder//
+    final ClassicRequestBuilder requestBuilder = ClassicRequestBuilder//
       .post(this.deviceAuthorizationEndpoint);
     if (this.clientId != null) {
       requestBuilder.addParameter("client_id", this.clientId);
@@ -147,11 +148,11 @@ public class OpenIdConnectClient extends BaseObjectWithProperties {
     return new DeviceCodeResponse(this, response, scope);
   }
 
-  public URI endSessionUrl(final String redirectUrl) {
-    final RequestBuilder builder = RequestBuilder//
+  public URI endSessionUrl(final String redirectUrl) throws URISyntaxException {
+    final ClassicRequestBuilder builder = ClassicRequestBuilder//
       .get(this.endSessionEndpoint)
       .addParameter("post_logout_redirect_uri", redirectUrl);
-    return builder.build().getURI();
+    return builder.build().getUri();
   }
 
   public String getAuthorizationEndpoint() {
@@ -170,7 +171,7 @@ public class OpenIdConnectClient extends BaseObjectWithProperties {
     return this.issuer;
   }
 
-  private OpenIdBearerToken getOpenIdBearerToken(final RequestBuilder requestBuilder,
+  private OpenIdBearerToken getOpenIdBearerToken(final ClassicRequestBuilder requestBuilder,
     final String scope) {
     try {
       final JsonObject response = ApacheHttp.getJson(requestBuilder);
@@ -230,7 +231,7 @@ public class OpenIdConnectClient extends BaseObjectWithProperties {
 
   public OpenIdBearerToken tokenAuthorizationCode(final String code, final String redirectUri,
     final String scope) {
-    final RequestBuilder builder = RequestBuilder//
+    final ClassicRequestBuilder builder = ClassicRequestBuilder//
       .post(this.tokenEndpoint)
       .addParameter("grant_type", "authorization_code")
       .addParameter("client_id", this.clientId)
@@ -240,8 +241,9 @@ public class OpenIdConnectClient extends BaseObjectWithProperties {
     return getOpenIdBearerToken(builder, scope);
   }
 
-  protected RequestBuilder tokenBuilder(final String grantType, final boolean useClientSecret) {
-    final RequestBuilder builder = RequestBuilder//
+  protected ClassicRequestBuilder tokenBuilder(final String grantType,
+    final boolean useClientSecret) {
+    final ClassicRequestBuilder builder = ClassicRequestBuilder//
       .post(this.tokenEndpoint)
       .addParameter("grant_type", grantType);
     if (this.clientId != null) {
@@ -254,7 +256,7 @@ public class OpenIdConnectClient extends BaseObjectWithProperties {
   }
 
   public OpenIdBearerToken tokenClientCredentials(final String scope) {
-    final RequestBuilder requestBuilder = tokenBuilder("client_credentials", true);
+    final ClassicRequestBuilder requestBuilder = tokenBuilder("client_credentials", true);
     if (scope != null) {
       requestBuilder.addParameter("scope", scope);
     }
@@ -263,7 +265,7 @@ public class OpenIdConnectClient extends BaseObjectWithProperties {
 
   public OpenIdBearerToken tokenDeviceCode(final String deviceCode, final String scope) {
     final String grantType = "urn:ietf:params:oauth:grant-type:device_code";
-    final RequestBuilder requestBuilder = tokenBuilder(grantType, false) //
+    final ClassicRequestBuilder requestBuilder = tokenBuilder(grantType, false) //
       .addParameter("device_code", deviceCode);
 
     return getOpenIdBearerToken(requestBuilder, scope);
@@ -271,7 +273,7 @@ public class OpenIdConnectClient extends BaseObjectWithProperties {
 
   public OpenIdBearerToken tokenPassword(final String username, final String password,
     final String scope) {
-    final RequestBuilder requestBuilder = tokenBuilder("password", true)//
+    final ClassicRequestBuilder requestBuilder = tokenBuilder("password", true)//
       .addParameter("username", username)
       .addParameter("password", password);
     if (scope != null) {
@@ -281,7 +283,7 @@ public class OpenIdConnectClient extends BaseObjectWithProperties {
   }
 
   public OpenIdBearerToken tokenRefresh(final String refreshToken, final String scope) {
-    final RequestBuilder requestBuilder = tokenBuilder("refresh_token", true);
+    final ClassicRequestBuilder requestBuilder = tokenBuilder("refresh_token", true);
     requestBuilder //
       .addParameter("refresh_token", refreshToken);
     if (scope != null) {

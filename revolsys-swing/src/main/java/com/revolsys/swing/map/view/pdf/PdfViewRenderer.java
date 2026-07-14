@@ -24,6 +24,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
@@ -66,7 +67,8 @@ import tech.units.indriya.quantity.Quantities;
 public class PdfViewRenderer extends ViewRenderer {
 
   private abstract class PdfMarkerRenderer extends AbstractMarkerRenderer {
-    protected final Matrix matrix = new Matrix();
+
+    protected Matrix matrix = new Matrix();
 
     private final double minX;
 
@@ -118,7 +120,7 @@ public class PdfViewRenderer extends ViewRenderer {
       final float viewX = (float)((x - this.minX) / this.modelUnitsPerViewUnit);
       final float viewY = (float)((y - this.minY) / this.modelUnitsPerViewUnit);
 
-      this.matrix.reset();
+      this.matrix = new Matrix();
       this.matrix.translate(viewX, viewY);
       if (orientation != 0) {
         this.matrix.rotate(Math.toRadians(360 - orientation));
@@ -755,7 +757,7 @@ public class PdfViewRenderer extends ViewRenderer {
               contentStream.setNonStrokingColor(style.getTextFill());
 
               contentStream.beginText();
-              final PDFont pdfFont = PDType1Font.HELVETICA;
+              final PDFont pdfFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
 
               contentStream.setFont(pdfFont, font.getSize2D());
               contentStream.setTextMatrix(transform);

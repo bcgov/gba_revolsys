@@ -623,7 +623,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
   private void consumeRemainingJsonNodeFields(final EdmEntityType edmEntityType,
     final ObjectNode node, final Entity entity) throws DeserializerException {
     final List<String> toRemove = new ArrayList<>();
-    final Iterator<Entry<String, JsonNode>> fieldsIterator = node.fields();
+    final Iterator<Entry<String, JsonNode>> fieldsIterator = node.properties().iterator();
     while (fieldsIterator.hasNext()) {
       final Entry<String, JsonNode> field = fieldsIterator.next();
 
@@ -1115,10 +1115,17 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     // There could be a more strict verification that the lines describe
     // boundaries and have the correct winding order.
     if (node.isArray() && (node.size() == 1 || node.size() == 2)) {
+
+      final List<Point> exteriorPoints = readGeoPointValues(name, dimension, 4, true, node.get(0));
+      final List<Point> interiorPoints = node.size() > 1
+        ? readGeoPointValues(name, dimension, 4, true, node.get(1))
+        : null;
+
       return new Polygon(dimension, srid,
-        node.size() > 1 ? readGeoPointValues(name, dimension, 4, true, node.get(1)) : null,
-        readGeoPointValues(name, dimension, 4, true, node.get(0)));
+        interiorPoints != null ? List.of(new LineString(dimension, srid, interiorPoints)) : null,
+        new LineString(dimension, srid, exteriorPoints));
     }
+
     throw new DeserializerException("Invalid polygon values '" + node + "' in property: " + name,
       DeserializerException.MessageKeys.INVALID_VALUE_FOR_PROPERTY, name);
   }
@@ -1231,7 +1238,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
 
   private void removeAnnotations(final ObjectNode tree) throws DeserializerException {
     final List<String> toRemove = new ArrayList<>();
-    final Iterator<Entry<String, JsonNode>> fieldsIterator = tree.fields();
+    final Iterator<Entry<String, JsonNode>> fieldsIterator = tree.properties().iterator();
     while (fieldsIterator.hasNext()) {
       final Map.Entry<String, JsonNode> field = fieldsIterator.next();
 

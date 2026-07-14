@@ -90,8 +90,8 @@ import com.revolsys.swing.map.overlay.ZoomOverlay;
 import com.revolsys.swing.map.overlay.record.EditRecordGeometryOverlay;
 import com.revolsys.swing.map.overlay.record.SelectRecordsOverlay;
 import com.revolsys.swing.menu.BaseJPopupMenu;
-import com.revolsys.swing.parallel.Invoke;
 import com.revolsys.swing.parallel.BackgroundTaskProgressBar;
+import com.revolsys.swing.parallel.Invoke;
 import com.revolsys.swing.toolbar.ToolBar;
 import com.revolsys.swing.undo.UndoManager;
 import com.revolsys.util.CaseConverter;
@@ -473,12 +473,6 @@ public class MapPanel extends JPanel implements GeometryFactoryProxy, PropertyCh
     Property.removeAllListeners(this.viewport.getPropertyChangeSupport());
     this.zoomBookmarkButton = null;
     this.zoomHistory.clear();
-  }
-
-  @Override
-  protected void finalize() throws Throwable {
-    this.layerOverlay.destroy();
-    super.finalize();
   }
 
   public CloseLocation findCloseLocation(final AbstractRecordLayer layer, final LayerRecord record,
@@ -1020,6 +1014,12 @@ public class MapPanel extends JPanel implements GeometryFactoryProxy, PropertyCh
     if (project != null) {
       project.refresh();
     }
+  }
+
+  @Override
+  public void removeNotify() {
+    super.removeNotify();
+    this.layerOverlay.destroy();
   }
 
   public synchronized void setBaseMapLayer(final Layer layer) {

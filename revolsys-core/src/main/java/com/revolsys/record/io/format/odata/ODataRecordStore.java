@@ -10,7 +10,7 @@ import java.util.function.BiConsumer;
 
 import javax.swing.SwingUtilities;
 
-import org.apache.http.NameValuePair;
+import org.apache.hc.core5.http.NameValuePair;
 import org.jeometry.common.data.identifier.Identifier;
 import org.jeometry.common.data.type.DataTypes;
 import org.jeometry.common.io.PathName;
@@ -23,7 +23,7 @@ import com.revolsys.geometry.model.Polygon;
 import com.revolsys.http.ApacheHttpRequestBuilder;
 import com.revolsys.http.ApacheHttpRequestBuilderFactory;
 import com.revolsys.http.ConfigurableRequestBuilderFactory;
-import com.revolsys.net.http.SimpleNameValuePair;
+import com.revolsys.net.http.apache5.SimpleNameValuePair;
 import com.revolsys.record.Record;
 import com.revolsys.record.io.RecordReader;
 import com.revolsys.record.io.RecordWriter;

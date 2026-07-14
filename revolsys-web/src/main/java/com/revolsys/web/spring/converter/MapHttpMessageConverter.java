@@ -41,7 +41,7 @@ public class MapHttpMessageConverter extends AbstractHttpMessageConverter<Map> {
       }
       return map;
     } catch (final Throwable e) {
-      throw new HttpMessageNotReadableException(e.getMessage(), e);
+      throw new HttpMessageNotReadableException(e.getMessage(), e, inputMessage);
     }
   }
 

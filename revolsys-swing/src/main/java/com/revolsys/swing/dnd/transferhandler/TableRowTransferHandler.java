@@ -3,9 +3,9 @@ package com.revolsys.swing.dnd.transferhandler;
 import java.awt.Cursor;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DragSource;
 
-import javax.activation.DataHandler;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
@@ -19,8 +19,6 @@ public class TableRowTransferHandler extends TransferHandler {
   private static final long serialVersionUID = 1L;
 
   private final DataFlavor localObjectFlavor = new DataFlavor(Integer.class, "Integer Row Index");
-
-  private final String mimeType = this.localObjectFlavor.getMimeType();
 
   private final JTable table;
 
@@ -47,8 +45,28 @@ public class TableRowTransferHandler extends TransferHandler {
     assert c == this.table;
     final int selectedRow = this.table.getSelectedRow();
     if (c == this.table) {
+      return new Transferable() {
 
-      return new DataHandler(selectedRow, this.mimeType);
+        @Override
+        public Object getTransferData(final DataFlavor f) throws UnsupportedFlavorException {
+          if (!isDataFlavorSupported(f)) {
+            throw new UnsupportedFlavorException(f);
+          }
+          return selectedRow;
+        }
+
+        @Override
+        public DataFlavor[] getTransferDataFlavors() {
+          return new DataFlavor[] {
+            TableRowTransferHandler.this.localObjectFlavor
+          };
+        }
+
+        @Override
+        public boolean isDataFlavorSupported(final DataFlavor f) {
+          return TableRowTransferHandler.this.localObjectFlavor.equals(f);
+        }
+      };
     } else {
       return null;
     }

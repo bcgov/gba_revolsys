@@ -1,7 +1,7 @@
 package com.revolsys.http;
 
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 
 import com.revolsys.record.io.format.json.JsonType;
 

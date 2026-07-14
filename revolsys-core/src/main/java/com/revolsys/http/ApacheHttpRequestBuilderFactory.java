@@ -3,7 +3,7 @@ package com.revolsys.http;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequest;
 
 public class ApacheHttpRequestBuilderFactory {
   public static final ApacheHttpRequestBuilderFactory FACTORY = new ApacheHttpRequestBuilderFactory();

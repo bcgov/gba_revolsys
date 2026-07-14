@@ -2,10 +2,10 @@ package com.revolsys.swing.field;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
@@ -94,7 +94,7 @@ public class ComboBox<T> extends JComboBox<T> implements Field, KeyListener {
     AutoCompleteDecorator.decorate(this, stringConverter);
     final JComponent editorComponent = (JComponent)getEditor().getEditorComponent();
     this.fieldSupport = new FieldSupport(this, editorComponent, fieldName, null, true);
-    addActionListener((final ActionEvent e) -> {
+    addActionListener((_) -> {
       final Object selectedItem = getSelectedItem();
       setFieldValue(selectedItem);
     });
@@ -107,15 +107,6 @@ public class ComboBox<T> extends JComboBox<T> implements Field, KeyListener {
     } catch (final CloneNotSupportedException e) {
       return Exceptions.throwUncheckedException(e);
     }
-  }
-
-  @Override
-  protected void finalize() throws Throwable {
-    final ComboBoxModel<T> model = getModel();
-    if (model instanceof Closeable) {
-      ((Closeable)model).close();
-    }
-    super.finalize();
   }
 
   @Override
@@ -183,6 +174,19 @@ public class ComboBox<T> extends JComboBox<T> implements Field, KeyListener {
         return value.toString();
       }
     };
+  }
+
+  @Override
+  public void removeNotify() {
+    super.removeNotify();
+    final ComboBoxModel<T> model = getModel();
+    if (model instanceof Closeable) {
+      try {
+        ((Closeable)model).close();
+      } catch (final IOException e) {
+        Exceptions.throwUncheckedException(e);
+      }
+    }
   }
 
   @Override

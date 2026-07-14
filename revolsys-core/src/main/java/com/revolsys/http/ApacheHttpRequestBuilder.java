@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -14,72 +15,55 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.apache.http.Consts;
-import org.apache.http.Header;
-import org.apache.http.HeaderIterator;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.Configurable;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpTrace;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.message.HeaderGroup;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.Args;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.classic.methods.HttpOptions;
+import org.apache.hc.client5.http.classic.methods.HttpPatch;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpTrace;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.Configurable;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpEntityContainer;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.ProtocolVersion;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.http.message.HeaderGroup;
+import org.apache.hc.core5.net.WWWFormCodec;
+import org.apache.hc.core5.util.Args;
 
-import com.revolsys.net.http.ApacheHttp;
+import com.revolsys.net.http.apache5.ApacheHttp;
 import com.revolsys.record.io.format.json.JsonObject;
 import com.revolsys.util.UriBuilder;
 
 public class ApacheHttpRequestBuilder {
 
-  static class InternalEntityEclosingRequest extends HttpEntityEnclosingRequestBase {
+  static class InternalEntityEclosingRequest extends HttpUriRequestBase {
 
-    private final String method;
+    InternalEntityEclosingRequest(final String method, final URI requestUri) {
+      super(method, requestUri);
 
-    InternalEntityEclosingRequest(final String method) {
-      super();
-      this.method = method;
-    }
-
-    @Override
-    public String getMethod() {
-      return this.method;
     }
 
   }
 
-  static class InternalRequest extends HttpRequestBase {
+  static class InternalRequest extends HttpUriRequestBase {
 
-    private final String method;
-
-    InternalRequest(final String method) {
-      super();
-      this.method = method;
-    }
-
-    @Override
-    public String getMethod() {
-      return this.method;
+    InternalRequest(final String method, final URI requestUri) {
+      super(method, requestUri);
     }
 
   }
@@ -194,7 +178,7 @@ public class ApacheHttpRequestBuilder {
 
   private String method;
 
-  private Charset charset = Consts.UTF_8;
+  private Charset charset = StandardCharsets.UTF_8;
 
   private ProtocolVersion version;
 
@@ -274,7 +258,7 @@ public class ApacheHttpRequestBuilder {
   }
 
   public HttpUriRequest build() {
-    final HttpRequestBase result;
+    final HttpUriRequestBase result;
     URI uri = this.uri;
     if (uri == null) {
       uri = URI.create("/");
@@ -284,39 +268,40 @@ public class ApacheHttpRequestBuilder {
       if (entityCopy == null && (HttpPost.METHOD_NAME.equalsIgnoreCase(this.method)
         || HttpPut.METHOD_NAME.equalsIgnoreCase(this.method))) {
         entityCopy = new UrlEncodedFormEntity(this.parameters,
-          this.charset != null ? this.charset : HTTP.DEF_CONTENT_CHARSET);
+          this.charset != null ? this.charset : StandardCharsets.ISO_8859_1);
       } else {
         uri = new UriBuilder(uri).setCharset(this.charset).addParameters(this.parameters).build();
       }
     }
     if (entityCopy == null) {
-      result = new InternalRequest(this.method);
+      result = new InternalRequest(this.method, uri);
     } else {
-      final InternalEntityEclosingRequest request = new InternalEntityEclosingRequest(this.method);
+      final InternalEntityEclosingRequest request = new InternalEntityEclosingRequest(this.method,
+        uri);
       request.setEntity(entityCopy);
       result = request;
     }
-    result.setProtocolVersion(this.version);
-    result.setURI(uri);
+    result.setVersion(this.version);
+
     if (this.headerGroup != null) {
-      result.setHeaders(this.headerGroup.getAllHeaders());
+      result.setHeaders(this.headerGroup.getHeaders());
     }
     result.setConfig(this.config);
     return result;
   }
 
   public void execute() {
-    final Consumer<HttpResponse> noop = r -> {
+    final Consumer<ClassicHttpResponse> noop = r -> {
     };
     execute(noop);
   }
 
-  public void execute(final Consumer<HttpResponse> action) {
+  public void execute(final Consumer<ClassicHttpResponse> action) {
     final HttpUriRequest request = build();
     ApacheHttp.execute(request, action);
   }
 
-  public <V> V execute(final Function<HttpResponse, V> action) {
+  public <V> V execute(final Function<ClassicHttpResponse, V> action) {
     final HttpUriRequest request = build();
     return ApacheHttp.execute(request, action);
   }
@@ -353,7 +338,7 @@ public class ApacheHttpRequestBuilder {
   }
 
   public JsonObject getJson() {
-    final Function<HttpResponse, JsonObject> function = ApacheHttp::getJson;
+    final Function<ClassicHttpResponse, JsonObject> function = ApacheHttp::getJson;
     return execute(function);
   }
 
@@ -370,7 +355,7 @@ public class ApacheHttpRequestBuilder {
   }
 
   public String getString() {
-    final Function<HttpResponse, String> function = ApacheHttp::getString;
+    final Function<ClassicHttpResponse, String> function = ApacheHttp::getString;
     return execute(function);
   }
 
@@ -397,12 +382,7 @@ public class ApacheHttpRequestBuilder {
   public ApacheHttpRequestBuilder removeHeaders(final String name) {
     if (name != null && this.headerGroup != null) {
       this.headerNames.remove(name);
-      for (final HeaderIterator i = this.headerGroup.iterator(); i.hasNext();) {
-        final Header header = i.nextHeader();
-        if (name.equalsIgnoreCase(header.getName())) {
-          i.remove();
-        }
-      }
+      this.headerGroup.removeHeaders(name);
     }
     return this;
   }
@@ -443,7 +423,7 @@ public class ApacheHttpRequestBuilder {
     if (this.headerGroup == null) {
       this.headerGroup = new HeaderGroup();
     }
-    this.headerGroup.updateHeader(header);
+    this.headerGroup.setHeader(header);
     return this;
   }
 
@@ -480,40 +460,37 @@ public class ApacheHttpRequestBuilder {
   }
 
   ApacheHttpRequestBuilder setRequest(final HttpRequest request) {
-    this.method = request.getRequestLine().getMethod();
-    this.version = request.getRequestLine().getProtocolVersion();
+    this.method = request.getMethod();
+    this.version = request.getVersion();
 
     if (this.headerGroup == null) {
       this.headerGroup = new HeaderGroup();
     }
     this.headerGroup.clear();
-    this.headerGroup.setHeaders(request.getAllHeaders());
+    this.headerGroup.setHeaders(request.getHeaders());
 
     this.parameters = null;
     this.entity = null;
 
-    if (request instanceof HttpEntityEnclosingRequest) {
-      final HttpEntity originalEntity = ((HttpEntityEnclosingRequest)request).getEntity();
-      final ContentType contentType = ContentType.get(originalEntity);
+    if (request instanceof HttpEntityContainer) {
+      final HttpEntity originalEntity = ((HttpEntityContainer)request).getEntity();
+      final ContentType contentType = ContentType.parse(originalEntity.getContentType());
       if (contentType != null && contentType.getMimeType()
         .equals(ContentType.APPLICATION_FORM_URLENCODED.getMimeType())) {
         try {
-          final List<NameValuePair> formParams = URLEncodedUtils.parse(originalEntity);
+          final List<NameValuePair> formParams = WWWFormCodec
+            .parse(EntityUtils.toString(originalEntity), StandardCharsets.UTF_8);
           if (!formParams.isEmpty()) {
             this.parameters = formParams;
           }
-        } catch (final IOException ignore) {
+        } catch (final IOException | ParseException ignore) {
         }
       } else {
         this.entity = originalEntity;
       }
     }
 
-    if (request instanceof HttpUriRequest) {
-      this.uri = ((HttpUriRequest)request).getURI();
-    } else {
-      this.uri = URI.create(request.getRequestLine().getUri());
-    }
+    this.uri = URI.create(request.getRequestUri());
 
     if (request instanceof Configurable) {
       this.config = ((Configurable)request).getConfig();

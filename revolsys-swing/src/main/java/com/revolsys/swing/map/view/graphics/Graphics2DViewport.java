@@ -37,12 +37,6 @@ public class Graphics2DViewport extends Viewport2D implements BaseCloseable {
   }
 
   @Override
-  protected void finalize() throws Throwable {
-    super.finalize();
-    close();
-  }
-
-  @Override
   public Graphics2DViewRenderer newViewRenderer() {
     return new Graphics2DViewRenderer(this, this.graphics);
   }

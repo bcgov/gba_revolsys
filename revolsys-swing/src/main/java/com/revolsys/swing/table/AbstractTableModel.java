@@ -52,6 +52,7 @@ public abstract class AbstractTableModel extends javax.swing.table.AbstractTable
   private final UndoManager undoManager = new UndoManager();
 
   public AbstractTableModel() {
+
   }
 
   /**

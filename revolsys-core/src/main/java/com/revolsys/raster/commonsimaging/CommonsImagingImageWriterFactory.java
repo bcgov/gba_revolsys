@@ -1,6 +1,6 @@
 package com.revolsys.raster.commonsimaging;
 
-import org.apache.commons.imaging.ImageParser;
+import org.apache.commons.imaging.AbstractImageParser;
 
 import com.revolsys.io.AbstractIoFactory;
 import com.revolsys.raster.GeoreferencedImageWriter;
@@ -10,16 +10,16 @@ import com.revolsys.spring.resource.Resource;
 public class CommonsImagingImageWriterFactory extends AbstractIoFactory
   implements GeoreferencedImageWriterFactory {
 
-  private final ImageParser imageParser;
+  private final AbstractImageParser<?> imageParser;
 
   public final String worldFileExtension;
 
-  public CommonsImagingImageWriterFactory(final ImageParser imageParser) {
+  public CommonsImagingImageWriterFactory(final AbstractImageParser<?> imageParser) {
     this(imageParser, imageParser.getName(), null, null);
   }
 
-  public CommonsImagingImageWriterFactory(final ImageParser imageParser, final String name,
-    final String mimeType, final String worldFileExtension) {
+  public CommonsImagingImageWriterFactory(final AbstractImageParser<?> imageParser,
+    final String name, final String mimeType, final String worldFileExtension) {
     super(name);
     this.imageParser = imageParser;
     this.worldFileExtension = worldFileExtension;

@@ -12,7 +12,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
 import org.jeometry.common.exception.Exceptions;
 
@@ -125,7 +125,7 @@ public class PdfViewport extends Viewport2D implements BaseCloseable {
     if (font == null) {
       final InputStream fontStream = PDDocument.class
         .getResourceAsStream("/org/apache/pdfbox/resources/ttf/ArialMT.ttf");
-      font = PDTrueTypeFont.loadTTF(this.document, fontStream);
+      font = PDType0Font.load(this.document, fontStream);
       this.fonts.put("/org/apache/pdfbox/resources/ttf/ArialMT.ttf", font);
     }
     return font;

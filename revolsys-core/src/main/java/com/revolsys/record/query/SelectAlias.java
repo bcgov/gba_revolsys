@@ -100,7 +100,6 @@ public class SelectAlias implements QueryValue {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public <V> V getValue(final MapEx record) {
     return this.value.getValue(record);
   }

@@ -4,7 +4,6 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
 
-@SuppressWarnings("serial")
 public class I18nMenuItem extends JMenuItem {
   /**
    *

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.commons.imaging.ImageWriteException;
+import org.apache.commons.imaging.ImagingException;
 import org.apache.commons.imaging.formats.tiff.constants.GeoTiffTagConstants;
 import org.apache.commons.imaging.formats.tiff.write.TiffImageWriterLossy;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputDirectory;
@@ -24,7 +24,6 @@ import org.jeometry.coordinatesystem.model.datum.GeodeticDatum;
 import org.jeometry.coordinatesystem.model.unit.AngularUnit;
 import org.jeometry.coordinatesystem.model.unit.LinearUnit;
 
-import com.revolsys.collection.map.MapEx;
 import com.revolsys.geometry.model.BoundingBox;
 import com.revolsys.geometry.model.GeometryFactory;
 import com.revolsys.io.AbstractWriter;
@@ -54,7 +53,6 @@ public class TiffGeoreferencedImageWriter extends AbstractWriter<GeoreferencedIm
     if (bufferedImage != null) {
       try (
         OutputStream out = this.resource.newBufferedOutputStream()) {
-        final MapEx params = getProperties();
 
         final TiffImageWriterLossy writer = new TiffImageWriterLossy() {
 
@@ -190,7 +188,7 @@ public class TiffGeoreferencedImageWriter extends AbstractWriter<GeoreferencedIm
           }
 
           private void addTransformation(final TiffOutputDirectory rootDirectory)
-            throws ImageWriteException {
+            throws ImagingException {
             final BoundingBox boundingBox = image.getBoundingBox();
             final double minX = boundingBox.getMinX();
             final double maxY = boundingBox.getMaxY();
@@ -209,7 +207,7 @@ public class TiffGeoreferencedImageWriter extends AbstractWriter<GeoreferencedIm
 
           @Override
           public void write(final OutputStream os, final TiffOutputSet outputSet)
-            throws IOException, ImageWriteException {
+            throws IOException, ImagingException {
             final TiffOutputDirectory rootDirectory = outputSet.getRootDirectory();
             addTransformation(rootDirectory);
             final GeometryFactory geometryFactory = image.getGeometryFactory();
@@ -246,8 +244,8 @@ public class TiffGeoreferencedImageWriter extends AbstractWriter<GeoreferencedIm
             super.write(os, outputSet);
           }
         };
-        writer.writeImage(bufferedImage, out, params);
-      } catch (final ImageWriteException | IOException e) {
+        writer.writeImage(bufferedImage, out, null);
+      } catch (final IOException e) {
         throw Exceptions.wrap("Unable to write: " + this.resource, e);
       }
     }

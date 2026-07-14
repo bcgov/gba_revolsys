@@ -984,7 +984,7 @@ public class ODataJsonSerializer extends AbstractODataSerializer {
       }
       final Link link = (Link)property.getValue();
       final Property stream = link.getInlineEntity().getProperty(propertyName);
-      final Base64 decoder = new Base64(true);
+      final Base64 decoder = Base64.builder().setUrlSafe(true).get();
       final byte[] decodedBytes = (byte[])decoder.decode(stream.getValue());
       json.labelValue(propertyName, new String(decodedBytes));
     }
