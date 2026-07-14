@@ -512,8 +512,10 @@ public interface SwingUtil {
   static boolean isLeftButtonAndNoModifiers(final MouseEvent event) {
     final boolean leftMouseButton = SwingUtilities.isLeftMouseButton(event);
     if (leftMouseButton) {
-      final int modifiers = event.getModifiersEx();
-      if (InputEvent.BUTTON1_DOWN_MASK == modifiers) {
+      // BUTTON1_DOWN_MASK is only set on the press event, not on release/click, so it must be
+      // masked out rather than compared for equality with the raw modifiers.
+      final int modifiers = event.getModifiersEx() & ~InputEvent.BUTTON1_DOWN_MASK;
+      if (modifiers == 0) {
         return true;
       }
     }
