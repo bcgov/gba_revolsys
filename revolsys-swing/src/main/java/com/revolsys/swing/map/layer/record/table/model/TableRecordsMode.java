@@ -26,6 +26,17 @@ public interface TableRecordsMode {
 
   String getKey();
 
+  /**
+   * The maximum number of records that can be loaded into the table
+   * at once. For paged mode, its going to be the pages size * the number of
+   * pages in the cache, for others its the record count.  Default
+   * is the record count.
+   * @return
+   */
+  default int getMaximumVisibleRecords() {
+    return getRecordCount();
+  }
+
   LayerRecord getRecord(int index);
 
   int getRecordCount();

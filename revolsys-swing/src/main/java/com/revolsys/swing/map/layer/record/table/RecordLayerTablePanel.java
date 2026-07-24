@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -63,6 +64,7 @@ import com.revolsys.swing.menu.BaseJPopupMenu;
 import com.revolsys.swing.menu.MenuFactory;
 import com.revolsys.swing.menu.MenuSourceHolder;
 import com.revolsys.swing.menu.ToggleButton;
+import com.revolsys.swing.parallel.Invoke;
 import com.revolsys.swing.table.TablePanel;
 import com.revolsys.swing.table.TableRowCount;
 import com.revolsys.swing.table.editor.BaseTableCellEditor;
@@ -72,6 +74,7 @@ import com.revolsys.util.Strings;
 
 public class RecordLayerTablePanel extends TablePanel
   implements PropertyChangeListener, MapSerializer {
+
   public static final String FILTER_FIELD = "filter_field";
 
   public static final String FILTER_GEOMETRY = "filter_geometry";
@@ -239,6 +242,105 @@ public class RecordLayerTablePanel extends TablePanel
     menu.showMenu(layer, this.fieldSetsButton, 10, 10);
   }
 
+  private void addFilterSelectionButton(final ToolBar toolBar) {
+    // add a button which selects all the records in the current filter
+    // the selection tool works on the table and the table must load all the
+    // required data first
+    // the only way I could figure out how to do this was validate
+    // each row in the model and if anything returns null wait until
+    final JButton[] btnSelectRef = new JButton[1];
+    final boolean[] working = new boolean[] {
+      false
+    };
+
+    btnSelectRef[0] = toolBar.addButton("search", "Select All Features In Search Results",
+      "map_select", () -> {
+        if (working[0]) {
+          return;
+        }
+
+        // clearSelection() doesn't work
+        this.getTable().getSelectionModel().setSelectionInterval(0, 0);
+        this.getTable().getSelectionModel().removeSelectionInterval(0, 0);
+
+        final int maxSelection = this.getTableModel()
+          .getTableRecordsMode()
+          .getMaximumVisibleRecords();
+        if (RecordLayerTablePanel.this.tableModel.getRowCount() > maxSelection) {
+          return;
+        }
+
+        // do a quick check if everything is loaded
+        final boolean isLoaded = IntStream.range(0, this.tableModel.getRowCount())
+          .noneMatch(i -> this.tableModel.getTable().getRecord(i) == null);
+
+        if (isLoaded) {
+          btnSelectRef[0].setEnabled(true);
+          this.tableModel.getSelectionModel()
+            .setSelectionInterval(0, this.tableModel.getRowCount());
+        } else {
+
+          // configure a job that will wait in the background for items to
+          // load
+          final Runnable waitForLoad = new Runnable() {
+            private void reset() {
+              working[0] = false;
+              btnSelectRef[0].setEnabled(true);
+              working[0] = false;
+            }
+
+            @Override
+            public void run() {
+              working[0] = true;
+              btnSelectRef[0].setEnabled(false);
+
+              for (int i = 0; i < maxSelection; i++) {
+                boolean stop = true;
+                for (int j = 0; j < RecordLayerTablePanel.this.tableModel.getRowCount(); j += 1) {
+                  final com.revolsys.record.Record x = RecordLayerTablePanel.this.tableModel
+                    .getTable()
+                    .getRecord(j);
+
+                  if (x == null) {
+                    stop = false;
+                    break;
+                  }
+                }
+
+                if (stop) {
+                  break;
+                } else {
+                  // something isn't loaded; wait a bit and try again
+                  try {
+                    Thread.sleep(10);
+                  } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    reset();
+                    return;
+                  }
+                }
+              }
+
+              RecordLayerTablePanel.this.tableModel.getSelectionModel()
+                .setSelectionInterval(0, RecordLayerTablePanel.this.tableModel.getRowCount());
+              reset();
+            }
+          };
+          Invoke.background("wait for load", waitForLoad);
+
+        }
+      });
+
+    // enable button only when filter and results are less that max selection
+    this.tableModel.addTableModelListener(e -> {
+      btnSelectRef[0].setEnabled(RecordLayerTablePanel.this.tableModel.isHasFilter()
+        && RecordLayerTablePanel.this.tableModel.getRowCount() > 0
+        && RecordLayerTablePanel.this.tableModel
+          .getRowCount() <= this.getTableModel().getTableRecordsMode().getMaximumVisibleRecords()
+        && !working[0]);
+    });
+  }
+
   protected JToggleButton addGeometryFilterToggleButton(final ToolBar toolBar, final int index,
     final String title, final String icon, final String mode, final EnableCheck enableCheck) {
     final JToggleButton button = toolBar.addToggleButtonTitleIcon(FILTER_GEOMETRY, index, title,
@@ -402,6 +504,8 @@ public class RecordLayerTablePanel extends TablePanel
           }
           menu.showMenu(component, 0, 20);
         }));
+
+      addFilterSelectionButton(toolBar);
     }
 
     final ToggleButton showCodeValues = toolBar.addRadioButton("view", -1, null, "Show Code Values",

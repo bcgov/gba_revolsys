@@ -241,7 +241,7 @@ public abstract class AbstractRecordTableModel extends AbstractTableModel {
       } else {
         text = field.toString(objectValue);
       }
-      if (text.length() == 0) {
+      if (text == null || text.length() == 0) {
         text = "-";
       }
       return text;
