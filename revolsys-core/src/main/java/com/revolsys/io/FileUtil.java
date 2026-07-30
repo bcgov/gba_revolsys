@@ -35,7 +35,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
@@ -54,6 +53,7 @@ import org.jeometry.common.logging.Logs;
 import com.revolsys.connection.file.FileConnectionManager;
 import com.revolsys.connection.file.FolderConnection;
 import com.revolsys.connection.file.FolderConnectionRegistry;
+import com.revolsys.io.file.Paths;
 import com.revolsys.io.filter.ExtensionFilenameFilter;
 import com.revolsys.io.filter.PatternFilenameFilter;
 import com.revolsys.spring.resource.PathResource;
@@ -717,7 +717,7 @@ public final class FileUtil {
     }
   }
 
-  public static File getFile(URI uri) {
+  public static File getFile(final URI uri) {
     final String scheme = uri.getScheme();
     if ("folderconnection".equalsIgnoreCase(scheme)) {
       final String authority = uri.getAuthority();
@@ -739,11 +739,7 @@ public final class FileUtil {
       }
       return file;
     } else if ("file".equalsIgnoreCase(scheme)) {
-      try {
-        uri = new URI(scheme, uri.getPath(), null);
-      } catch (final URISyntaxException e) {
-      }
-      return getFile(new File(uri));
+      return getFile(Paths.getPath(uri).toFile());
     } else {
       throw new IllegalArgumentException("file URL expected: " + uri);
     }
@@ -1004,12 +1000,7 @@ public final class FileUtil {
   public static File getUrlFile(final String url) {
     if (Property.hasValue(url)) {
       if (url.startsWith("file:") || url.startsWith("folderconnection:")) {
-        try {
-          final URI uri = new URI(url);
-          return getFile(uri);
-        } catch (final URISyntaxException e) {
-          Exceptions.throwUncheckedException(e);
-        }
+        return getFile(URI.create(url));
       } else {
         return getFile(url);
       }
