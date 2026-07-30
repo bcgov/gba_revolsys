@@ -2,7 +2,6 @@ package com.revolsys.util;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -46,7 +45,13 @@ public class PropertyDescriptorCache {
       if (propertyDescriptors == null) {
         propertyDescriptors = new HashMap<>();
         try {
-          final BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
+          // this changed between java17 and java25
+          // Historically, Introspector only looked at getter/setter methods
+          // declared or overridden in classes —
+          // it ignored default methods declared directly on an interface and
+          // inherited unmodified.
+          // That was tracked as JDK-8071693
+          final BeanInfo beanInfo = Java17CompatibleIntrospector.getBeanInfo(clazz);
           for (final PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
             final String propertyName = propertyDescriptor.getName();
             propertyDescriptors.put(propertyName, propertyDescriptor);

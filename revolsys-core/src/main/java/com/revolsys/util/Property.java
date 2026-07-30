@@ -335,7 +335,7 @@ public interface Property {
   static PropertyDescriptor descriptor(final Class<?> beanClass, final String name) {
     if (beanClass != null && Property.hasValue(name)) {
       try {
-        final BeanInfo beanInfo = Introspector.getBeanInfo(beanClass);
+        final BeanInfo beanInfo = Java17CompatibleIntrospector.getBeanInfo(beanClass);
         final PropertyDescriptor[] props = beanInfo.getPropertyDescriptors();
         for (final PropertyDescriptor property : props) {
           if (property.getName().equals(name)) {
