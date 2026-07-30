@@ -247,7 +247,8 @@ public class RecordLayerTablePanel extends TablePanel
     // the selection tool works on the table and the table must load all the
     // required data first
     // the only way I could figure out how to do this was validate
-    // each row in the model and if anything returns null wait until
+    // each row in the model and if anything returns null wait until it has
+    // loaded
     final JButton[] btnSelectRef = new JButton[1];
     final boolean[] working = new boolean[] {
       false
@@ -331,7 +332,8 @@ public class RecordLayerTablePanel extends TablePanel
         }
       });
 
-    // enable button only when filter and results are less that max selection
+    // enable button only when filter and results are less than max selection
+    // size
     this.tableModel.addTableModelListener(e -> {
       btnSelectRef[0].setEnabled(RecordLayerTablePanel.this.tableModel.isHasFilter()
         && RecordLayerTablePanel.this.tableModel.getRowCount() > 0
