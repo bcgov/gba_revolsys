@@ -29,13 +29,16 @@ import com.revolsys.swing.parallel.Invoke;
 import com.revolsys.util.Property;
 
 public class ModeAllPaged extends ModeAbstractCached {
+
+  private static final int MAX_PAGES = 50;
+
   private int persistedRecordCount;
 
   private SwingWorker<?, ?> recordCountWorker;
 
   private final int pageSize = 100;
 
-  private final Map<Integer, List<LayerRecord>> pageCache = new LruMap<>(5);
+  private final Map<Integer, List<LayerRecord>> pageCache = new LruMap<>(MAX_PAGES);
 
   private final Set<Integer> loadingPageNumbers = new LinkedHashSet<>();
 
@@ -88,6 +91,11 @@ public class ModeAllPaged extends ModeAbstractCached {
   @Override
   public Icon getIcon() {
     return Icons.getIcon("table_filter");
+  }
+
+  @Override
+  public int getMaximumVisibleRecords() {
+    return this.pageSize * MAX_PAGES;
   }
 
   @Override
@@ -332,6 +340,15 @@ public class ModeAllPaged extends ModeAbstractCached {
   public void refresh(final long refreshIndex) {
     clear();
     super.refresh(refreshIndex);
+  }
+
+  // required fix a deadlock bug
+  // and always lock this before querySync
+  @Override
+  public void setQuery(final Query query) {
+    synchronized (this) {
+      super.setQuery(query);
+    }
   }
 
   protected void setRecords(final Query query, final long refreshIndex, final int pageNumber,
