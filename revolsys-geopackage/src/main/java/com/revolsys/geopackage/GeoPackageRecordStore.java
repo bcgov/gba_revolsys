@@ -550,7 +550,7 @@ public class GeoPackageRecordStore extends AbstractJdbcRecordStore {
 
   public MapEx selectMapNoFunctions(final String sql, final Object... parameters) {
     try (
-      JdbcConnection connection = super.getJdbcConnection(true)) {
+      JdbcConnection connection = super.getJdbcConnection()) {
       try (
         final PreparedStatement statement = connection.prepareStatement(sql)) {
         JdbcUtils.setParameters(statement, parameters);
