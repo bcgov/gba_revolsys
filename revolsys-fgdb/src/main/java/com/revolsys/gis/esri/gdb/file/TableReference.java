@@ -124,18 +124,19 @@ class TableReference extends CloseableValueHolder<Table> {
   boolean deleteRecordRow(final Record record) {
     final Integer objectId = record.getInteger("OBJECTID");
     if (objectId != null) {
-      synchronized (this.geodatabase) {
-        try (
-          BaseCloseable lock = writeLock(false)) {
-          final String deleteSql = "DELETE FROM " + this.tableName + " WHERE OBJECTID=" + objectId;
-          final EnumRows rows = query(deleteSql, true);
+      // Methods synchronized on this table must not be called while synchronized
+      // on the geodatabase, as other threads lock the table then the geodatabase.
+      try (
+        BaseCloseable lock = writeLock(false)) {
+        final String deleteSql = "DELETE FROM " + this.tableName + " WHERE OBJECTID=" + objectId;
+        synchronized (this.geodatabase) {
+          final EnumRows rows = this.geodatabase.query(deleteSql, true);
           closeRowsDo(rows);
-
-          record.setState(RecordState.DELETED);
-          this.recordStore.addStatistic("Delete", record);
-          return true;
         }
       }
+      record.setState(RecordState.DELETED);
+      this.recordStore.addStatistic("Delete", record);
+      return true;
     }
     return false;
   }
@@ -301,49 +302,56 @@ class TableReference extends CloseableValueHolder<Table> {
     if (objectId != null) {
       validateRequired(record);
       final String whereClause = "OBJECTID=" + objectId;
-      synchronized (this.geodatabase) {
+      // Methods synchronized on this table must not be called while synchronized
+      // on the geodatabase, as other threads lock the table then the geodatabase.
+      try (
+        BaseCloseable lock = writeLock(false)) {
         final Table table = getValue();
-        try (
-          BaseCloseable lock = writeLock(false)) {
-          final EnumRows rows = table.search("*", whereClause, false);
+        if (table != null) {
+          boolean updated = false;
           try {
-            final Row row = rows.next();
-            if (row != null) {
+            synchronized (this.geodatabase) {
+              final EnumRows rows = table.search("*", whereClause, false);
               try {
-                for (final FieldDefinition field : this.recordDefinition.getFields()) {
-                  final String name = field.getName();
+                final Row row = rows.next();
+                if (row != null) {
                   try {
-                    final Object value = record.getValue(name);
-                    final AbstractFileGdbFieldDefinition esriField = (AbstractFileGdbFieldDefinition)field;
-                    esriField.setUpdateValue(record, row, value);
+                    for (final FieldDefinition field : this.recordDefinition.getFields()) {
+                      final String name = field.getName();
+                      try {
+                        final Object value = record.getValue(name);
+                        final AbstractFileGdbFieldDefinition esriField = (AbstractFileGdbFieldDefinition)field;
+                        esriField.setUpdateValue(record, row, value);
+                      } catch (final Throwable e) {
+                        throw new ObjectPropertyException(record, name, e);
+                      }
+                    }
+                    synchronized (table) {
+                      table.updateRow(row);
+                    }
+                  } catch (final ObjectException e) {
+                    if (e.getObject() == record) {
+                      throw e;
+                    } else {
+                      throw new ObjectException(record, e);
+                    }
                   } catch (final Throwable e) {
-                    throw new ObjectPropertyException(record, name, e);
+                    throw new ObjectException(record, e);
                   }
+                  row.delete();
+                  updated = true;
                 }
-                synchronized (table) {
-                  table.updateRow(row);
-                }
-                record.setState(RecordState.PERSISTED);
-              } catch (final ObjectException e) {
-                if (e.getObject() == record) {
-                  throw e;
-                } else {
-                  throw new ObjectException(record, e);
-                }
-              } catch (final Throwable e) {
-                throw new ObjectException(record, e);
+              } finally {
+                closeRowsDo(rows);
               }
-              row.delete();
-              this.recordStore.addStatistic("Update", record);
-
-              return true;
             }
           } finally {
-            try {
-              closeRowsDo(rows);
-            } finally {
-              disconnect();
-            }
+            disconnect();
+          }
+          if (updated) {
+            record.setState(RecordState.PERSISTED);
+            this.recordStore.addStatistic("Update", record);
+            return true;
           }
         }
       }

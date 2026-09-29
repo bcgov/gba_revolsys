@@ -283,6 +283,15 @@ public class FileGdbRecordStore extends AbstractRecordStore {
     }
   }
 
+  // Known deadlock risk: this holds the geodatabase lock while closing the
+  // writer and tables, which lock each TableReference. Other threads lock a
+  // TableReference then the geodatabase (e.g. reading rows, releasing a
+  // connection), so closing the record store while another thread is still
+  // using one of its tables can deadlock. Closing tables outside the
+  // geodatabase lock would avoid this, but the record store must not be closed
+  // while in use regardless: open iterators or writers on other threads may
+  // still reference native objects that are freed here. GBA exports close all
+  // writers before closing the record store, so they are not affected.
   public void closeDo() {
     this.exists = false;
     synchronized (this.geodatabase) {
@@ -457,6 +466,15 @@ public class FileGdbRecordStore extends AbstractRecordStore {
     }
   }
 
+  // Known deadlock risk: this holds the geodatabase lock while looking up the
+  // schema, which can lock the record store (uncached paths) and the schema
+  // (loading a schema that isn't initialized). Schema loading takes those
+  // locks in the opposite order (record store -> schema -> geodatabase, see
+  // refreshSchemaElements), so creating a table while another thread loads a
+  // schema for the first time can deadlock. newSchema and newRecordWriter have
+  // the same problem. New geodatabases are not affected as their schemas are
+  // created initialized and never lazily loaded (e.g. GBA exports); existing
+  // geodatabases load the root schema and each feature dataset on first access.
   @SuppressWarnings("unchecked")
   @Override
   public <RD extends RecordDefinition> RD getRecordDefinition(
@@ -872,6 +890,7 @@ public class FileGdbRecordStore extends AbstractRecordStore {
     return new FileGdbRecordStoreSchema(this);
   }
 
+  // See the deadlock note on getRecordDefinition(RecordDefinition).
   private FileGdbRecordStoreSchema newSchema(final PathName schemaPath,
     final SpatialReference spatialReference) {
     synchronized (this.geodatabase) {
@@ -967,6 +986,10 @@ public class FileGdbRecordStore extends AbstractRecordStore {
     }
   }
 
+  // Called with the schema locked, then locks the geodatabase. Looking up a child
+  // schema that isn't cached locks the record store, and refreshing an
+  // initialized child schema locks it. See the deadlock note on
+  // getRecordDefinition(RecordDefinition).
   @Override
   protected Map<PathName, ? extends RecordStoreSchemaElement> refreshSchemaElements(
     final RecordStoreSchema schema) {
