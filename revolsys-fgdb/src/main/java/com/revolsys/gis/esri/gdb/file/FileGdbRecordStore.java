@@ -226,7 +226,7 @@ public class FileGdbRecordStore extends AbstractRecordStore {
           }
           final Object argument = parameters.get(i);
           final StringBuilder replacement = new StringBuilder();
-          matcher.appendReplacement(replacement, DataTypes.toString(argument));
+          matcher.appendReplacement(replacement, "");
           sql.append(replacement);
           appendValue(sql, argument);
           i++;
