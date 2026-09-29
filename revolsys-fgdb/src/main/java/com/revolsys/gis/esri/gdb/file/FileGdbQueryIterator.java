@@ -97,7 +97,8 @@ public class FileGdbQueryIterator extends AbstractIterator<Record>
     }
     if (close) {
       synchronized (this) {
-        if (this.recordDefinition != null) {
+        final RecordDefinition recordDefinition = this.recordDefinition;
+        if (recordDefinition != null) {
           this.recordDefinition = null;
           try {
             try {
@@ -114,7 +115,7 @@ public class FileGdbQueryIterator extends AbstractIterator<Record>
               }
             }
           } catch (final Throwable e) {
-            Logs.error(this, "Error closing query: " + this.recordDefinition.getPathName(), e);
+            Logs.error(this, "Error closing query: " + recordDefinition.getPathName(), e);
           } finally {
             this.boundingBox = null;
             this.recordStore = null;
@@ -247,6 +248,11 @@ public class FileGdbQueryIterator extends AbstractIterator<Record>
 
   @Override
   public String toString() {
-    return this.recordDefinition.getPathName() + " " + this.sql;
+    final RecordDefinition recordDefinition = this.recordDefinition;
+    if (recordDefinition == null) {
+      return "Closed query";
+    } else {
+      return recordDefinition.getPathName() + " " + this.sql;
+    }
   }
 }
