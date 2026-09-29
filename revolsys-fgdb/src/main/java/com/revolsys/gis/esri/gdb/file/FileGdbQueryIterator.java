@@ -18,7 +18,6 @@ import com.revolsys.record.io.RecordReader;
 import com.revolsys.record.query.Query;
 import com.revolsys.record.schema.FieldDefinition;
 import com.revolsys.record.schema.RecordDefinition;
-import com.revolsys.util.Strings;
 import com.revolsys.util.count.LabelCounters;
 
 public class FileGdbQueryIterator extends AbstractIterator<Record>
@@ -75,11 +74,10 @@ public class FileGdbQueryIterator extends AbstractIterator<Record>
     } else {
       this.recordStore = recordStore;
       this.table = recordDefinition.getGdbTableReference().connect();
-      if ("*".equals(fields)) {
-        this.fields = Strings.toString(this.recordDefinition.getFieldNames());
-      } else {
-        this.fields = fields;
-      }
+      // Fields are read by their index in the full table, so "*" must not be
+      // expanded to the record definition's field names (which omit unsupported
+      // field types).
+      this.fields = fields;
       setBoundingBox(boundingBox);
       this.recordFactory = recordStore.getRecordFactory();
       this.offset = offset;

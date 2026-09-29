@@ -422,7 +422,8 @@ public class FileGdbRecordStore extends AbstractRecordStore {
           }
         }
       } else {
-        final GeometryFieldDefinition geometryField = (GeometryFieldDefinition)recordDefinition
+        final GeometryFieldDefinition geometryField = (GeometryFieldDefinition)table
+          .getRecordDefinition()
           .getGeometryField();
         if (geometryField == null || boundingBox.isEmpty()) {
           return 0;
@@ -440,7 +441,8 @@ public class FileGdbRecordStore extends AbstractRecordStore {
             final FileGdbEnumRowsIterator rows = tableWrapper.query(sql.toString(), false)) {
             int count = 0;
             for (final Row row : rows) {
-              final Geometry geometry = (Geometry)geometryField.getValue(row);
+              // The geometry is the only column selected so it is at index 0
+              final Geometry geometry = geometryField.getValue(row, 0);
               if (geometry != null) {
                 final BoundingBox geometryBoundingBox = geometry.getBoundingBox();
                 if (geometryBoundingBox.bboxIntersects(boundingBox)) {
@@ -723,7 +725,9 @@ public class FileGdbRecordStore extends AbstractRecordStore {
       sql = whereClause;
     } else {
       sql.append("SELECT ");
-      query.appendSelect(sql);
+      // Fields are read by their index in the full table, so all fields must be
+      // selected in table order even if the query has a select list.
+      fileGdbRecordDefinition.appendSelectAll(query, sql);
       sql.append(" FROM ");
       sql.append(JdbcUtils.getTableName(catalogPath));
       if (whereClause.length() > 0) {
