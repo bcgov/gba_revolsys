@@ -620,7 +620,7 @@ public class FileGdbRecordStore extends AbstractRecordStore {
         final VectorOfWString domainNames = geodatabase.getDomains();
         for (int i = 0; i < domainNames.size(); i++) {
           final String domainName = domainNames.get(i);
-          final String domainDef = this.geodatabase.getDomainDefinition(domainName);
+          final String domainDef = geodatabase.getDomainDefinition(domainName);
           loadDomain(domainName, domainDef);
         }
         exists = true;
