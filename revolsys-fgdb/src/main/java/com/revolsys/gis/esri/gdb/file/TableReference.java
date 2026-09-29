@@ -269,7 +269,7 @@ class TableReference extends CloseableValueHolder<Table> {
   }
 
   synchronized boolean isLocked() {
-    return this.lockCount >= 0;
+    return this.lockCount > 0;
   }
 
   @Override
