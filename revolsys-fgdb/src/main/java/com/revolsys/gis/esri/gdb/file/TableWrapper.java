@@ -121,7 +121,7 @@ public interface TableWrapper extends ValueHolderWrapper<Table>, BaseCloseable {
           logQuery.append(" WHERE ");
           if (Property.hasValue(whereClause)) {
             logQuery.append(whereClause);
-            logQuery.append(" AND");
+            logQuery.append(" AND ");
           }
           logQuery.append("GEOMETRY intersects ");
           logQuery.append(BoundingBox.bboxToWkt(//

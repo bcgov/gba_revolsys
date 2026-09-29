@@ -156,7 +156,7 @@ public class FileGdbRecordDefinition extends RecordDefinitionImpl {
                 final Object max = fieldDefinition.toFieldValueException(maxValue);
                 fieldDefinition.setMaxValue(max);
               } catch (final Exception e) {
-                Logs.error(this, "Invalid domain minValue=" + maxValue);
+                Logs.error(this, "Invalid domain maxValue=" + maxValue);
               }
             }
           }

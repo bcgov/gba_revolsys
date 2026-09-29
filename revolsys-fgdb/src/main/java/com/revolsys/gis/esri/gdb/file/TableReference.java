@@ -232,6 +232,7 @@ class TableReference extends CloseableValueHolder<Table> {
             synchronized (this.geodatabase) {
               table.insertRow(row);
             }
+            recordStore.addStatistic("Insert", record);
             if (sourceRecordDefinition == recordDefinition) {
               record.setState(RecordState.INITIALIZING);
               try {
@@ -251,7 +252,6 @@ class TableReference extends CloseableValueHolder<Table> {
             synchronized (this) {
               row.delete();
             }
-            recordStore.addStatistic("Insert", record);
           }
         } finally {
           disconnect();
