@@ -1,6 +1,6 @@
 package com.revolsys.record.property;
 
-import com.revolsys.geometry.model.LineString;
+import com.revolsys.geometry.model.Geometry;
 import com.revolsys.record.Record;
 import com.revolsys.record.schema.RecordDefinition;
 import com.revolsys.util.Property;
@@ -47,8 +47,8 @@ public class AreaFieldName extends AbstractRecordDefinitionProperty {
 
   public void setArea(final Record record) {
     if (Property.hasValue(this.fieldName)) {
-      final LineString line = record.getGeometry();
-      final double area = line.getArea();
+      final Geometry geometry = record.getGeometry();
+      final double area = geometry.getArea();
       record.setValue(this.fieldName, area);
     }
   }

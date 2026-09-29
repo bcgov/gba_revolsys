@@ -36,6 +36,7 @@ import com.revolsys.record.io.format.esri.gdb.xml.model.Field;
 import com.revolsys.record.io.format.esri.gdb.xml.model.Index;
 import com.revolsys.record.io.format.esri.gdb.xml.model.enums.FieldType;
 import com.revolsys.record.io.format.xml.XmlProcessor;
+import com.revolsys.record.property.AreaFieldName;
 import com.revolsys.record.property.LengthFieldName;
 import com.revolsys.record.query.Query;
 import com.revolsys.record.schema.RecordDefinitionImpl;
@@ -101,7 +102,7 @@ public class FileGdbRecordDefinition extends RecordDefinitionImpl {
       lengthFieldNameProperty.setRecordDefinition(this);
 
       areaFieldName = featureClass.getAreaFieldName();
-      final LengthFieldName areaFieldNameProperty = new LengthFieldName(areaFieldName);
+      final AreaFieldName areaFieldNameProperty = new AreaFieldName(areaFieldName);
       areaFieldNameProperty.setRecordDefinition(this);
 
     }
