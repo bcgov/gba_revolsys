@@ -143,11 +143,12 @@ public interface TableWrapper extends ValueHolderWrapper<Table>, BaseCloseable {
   }
 
   default void updateRecord(final Record record) {
-    final Object objectId = record.getValue("OBJECTID");
+    final TableReference tableReference = getTableReference();
+    final String oidFieldName = tableReference.getRecordDefinition().getOidFieldName();
+    final Object objectId = record.getValue(oidFieldName);
     if (objectId == null) {
       insertRecord(record);
     } else if (record.getState() == RecordState.MODIFIED) {
-      final TableReference tableReference = getTableReference();
       tableReference.updateRecordRow(record);
     }
   }

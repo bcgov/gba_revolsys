@@ -13,7 +13,6 @@ import com.revolsys.esri.filegdb.jni.Row;
 import com.revolsys.esri.filegdb.jni.Table;
 import com.revolsys.gis.esri.gdb.file.capi.type.AbstractFileGdbFieldDefinition;
 import com.revolsys.io.BaseCloseable;
-import com.revolsys.jdbc.JdbcUtils;
 import com.revolsys.record.Record;
 import com.revolsys.record.RecordState;
 import com.revolsys.record.schema.FieldDefinition;
@@ -93,8 +92,6 @@ class TableReference extends CloseableValueHolder<Table> {
 
   private final FileGdbRecordDefinition recordDefinition;
 
-  private final String tableName;
-
   TableReference(final FileGdbRecordStore recordStore,
     final FileGdbRecordDefinition recordDefinition, final GeodatabaseReference geodatabase,
     final PathName pathName, final String catalogPath) {
@@ -103,7 +100,6 @@ class TableReference extends CloseableValueHolder<Table> {
     this.geodatabase = geodatabase;
     this.pathName = pathName;
     this.catalogPath = catalogPath;
-    this.tableName = JdbcUtils.getQualifiedTableName(this.recordDefinition.getPath());
   }
 
   void closeRowsDo(final EnumRows rows) {
@@ -122,21 +118,44 @@ class TableReference extends CloseableValueHolder<Table> {
   }
 
   boolean deleteRecordRow(final Record record) {
-    final Integer objectId = record.getInteger("OBJECTID");
+    final String oidFieldName = this.recordDefinition.getOidFieldName();
+    final Integer objectId = record.getInteger(oidFieldName);
     if (objectId != null) {
+      final String whereClause = oidFieldName + "=" + objectId;
       // Methods synchronized on this table must not be called while synchronized
       // on the geodatabase, as other threads lock the table then the geodatabase.
       try (
         BaseCloseable lock = writeLock(false)) {
-        final String deleteSql = "DELETE FROM " + this.tableName + " WHERE OBJECTID=" + objectId;
-        synchronized (this.geodatabase) {
-          final EnumRows rows = this.geodatabase.query(deleteSql, true);
-          closeRowsDo(rows);
+        final Table table = getValue();
+        if (table != null) {
+          boolean deleted = false;
+          try {
+            synchronized (this.geodatabase) {
+              final EnumRows rows = table.search("*", whereClause, false);
+              try {
+                final Row row = rows.next();
+                if (row != null) {
+                  try {
+                    table.deleteRow(row);
+                    deleted = true;
+                  } finally {
+                    row.delete();
+                  }
+                }
+              } finally {
+                closeRowsDo(rows);
+              }
+            }
+          } finally {
+            disconnect();
+          }
+          if (deleted) {
+            record.setState(RecordState.DELETED);
+            this.recordStore.addStatistic("Delete", record);
+            return true;
+          }
         }
       }
-      record.setState(RecordState.DELETED);
-      this.recordStore.addStatistic("Delete", record);
-      return true;
     }
     return false;
   }
@@ -298,10 +317,11 @@ class TableReference extends CloseableValueHolder<Table> {
   }
 
   boolean updateRecordRow(final Record record) {
-    final Integer objectId = record.getInteger("OBJECTID");
+    final String oidFieldName = this.recordDefinition.getOidFieldName();
+    final Integer objectId = record.getInteger(oidFieldName);
     if (objectId != null) {
       validateRequired(record);
-      final String whereClause = "OBJECTID=" + objectId;
+      final String whereClause = oidFieldName + "=" + objectId;
       // Methods synchronized on this table must not be called while synchronized
       // on the geodatabase, as other threads lock the table then the geodatabase.
       try (

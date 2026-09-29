@@ -219,6 +219,16 @@ public class FileGdbRecordDefinition extends RecordDefinitionImpl {
     return this.catalogPath;
   }
 
+  /**
+   * Get the name of the ESRI object id field. This is usually OBJECTID but may
+   * be different (e.g. OBJECTID_1 if the source data had an OBJECTID field).
+   *
+   * @return The object id field name.
+   */
+  public String getOidFieldName() {
+    return this.deTable.getOIDFieldName();
+  }
+
   @SuppressWarnings("unchecked")
   public <T extends DETable> T getDeTable() {
     return (T)this.deTable;

@@ -412,7 +412,9 @@ public class FileGdbRecordStore extends AbstractRecordStore {
           return table.getRecordCount();
         } else {
           final StringBuilder sql = new StringBuilder();
-          sql.append("SELECT OBJECTID FROM ");
+          sql.append("SELECT ");
+          sql.append(table.getRecordDefinition().getOidFieldName());
+          sql.append(" FROM ");
           sql.append(JdbcUtils.getTableName(typePath.toString()));
           if (whereClause.length() > 0) {
             sql.append(" WHERE ");
@@ -759,7 +761,8 @@ public class FileGdbRecordStore extends AbstractRecordStore {
         if (field instanceof ColumnReference) {
           final ColumnReference column = (ColumnReference)field;
           final String fieldName = column.getAliasName();
-          if (order.isAscending() && fieldName.toString().equals("OBJECTID")) {
+          if (order.isAscending()
+            && fieldName.equals(fileGdbRecordDefinition.getOidFieldName())) {
             useOrderBy = false;
           }
         }
@@ -808,14 +811,14 @@ public class FileGdbRecordStore extends AbstractRecordStore {
   @Override
   public Identifier newPrimaryIdentifier(final PathName typePath) {
     synchronized (this.idGenerators) {
-      final RecordDefinition recordDefinition = getRecordDefinition(typePath);
+      final FileGdbRecordDefinition recordDefinition = getRecordDefinition(typePath);
       if (recordDefinition == null) {
         return null;
       } else {
         final String idFieldName = recordDefinition.getIdFieldName();
         if (idFieldName == null) {
           return null;
-        } else if (!idFieldName.equals("OBJECTID")) {
+        } else if (!idFieldName.equals(recordDefinition.getOidFieldName())) {
           AtomicLong idGenerator = this.idGenerators.get(typePath);
           if (idGenerator == null) {
             long maxId = 0;
