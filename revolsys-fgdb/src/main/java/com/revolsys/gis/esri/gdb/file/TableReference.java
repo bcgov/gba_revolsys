@@ -408,10 +408,22 @@ class TableReference extends CloseableValueHolder<Table> {
 
   @Override
   protected Table valueNew() {
-    // System.out.println("CO\tg\t" + this.geodatabase);
-    this.geodatabaseClosable = this.geodatabase.connect();
-    // System.out.println("OP\tt\t" + this);
-    return this.geodatabase.openTable(this.catalogPath);
+    // The connection keeps the geodatabase open while the table is open. It is
+    // released in valueClose, which is only called if a table was returned, so
+    // release it here if the table couldn't be opened.
+    final BaseCloseable connection = this.geodatabase.connect();
+    try {
+      final Table table = this.geodatabase.openTable(this.catalogPath);
+      if (table != null) {
+        this.geodatabaseClosable = connection;
+        return table;
+      }
+    } catch (final RuntimeException | Error e) {
+      connection.close();
+      throw e;
+    }
+    connection.close();
+    return null;
   }
 
   void withTableLock(final Runnable action) {
