@@ -316,17 +316,6 @@ class TableReference extends CloseableValueHolder<Table> {
     return null;
   }
 
-  synchronized void setLoadOnlyMode(final boolean loadOnly) {
-    final Table table = getValue();
-    if (table != null) {
-      try {
-        table.setLoadOnlyMode(loadOnly);
-      } finally {
-        disconnect();
-      }
-    }
-  }
-
   @Override
   public String toString() {
     return this.recordStore.getFileName() + "\t" + this.catalogPath;

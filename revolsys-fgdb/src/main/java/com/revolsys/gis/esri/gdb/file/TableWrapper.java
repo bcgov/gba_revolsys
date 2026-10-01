@@ -137,11 +137,6 @@ public interface TableWrapper extends ValueHolderWrapper<Table>, BaseCloseable {
     return new FileGdbEnumRowsIterator(this, rows);
   }
 
-  default void setLoadOnlyMode(final boolean loadOnly) {
-    final TableReference tableReference = getTableReference();
-    tableReference.setLoadOnlyMode(loadOnly);
-  }
-
   default void updateRecord(final Record record) {
     final TableReference tableReference = getTableReference();
     final String oidFieldName = tableReference.getRecordDefinition().getOidFieldName();
