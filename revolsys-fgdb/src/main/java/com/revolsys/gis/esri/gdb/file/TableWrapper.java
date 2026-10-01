@@ -121,7 +121,7 @@ public interface TableWrapper extends ValueHolderWrapper<Table>, BaseCloseable {
           logQuery.append(" WHERE ");
           if (Property.hasValue(whereClause)) {
             logQuery.append(whereClause);
-            logQuery.append(" AND");
+            logQuery.append(" AND ");
           }
           logQuery.append("GEOMETRY intersects ");
           logQuery.append(BoundingBox.bboxToWkt(//
@@ -137,17 +137,13 @@ public interface TableWrapper extends ValueHolderWrapper<Table>, BaseCloseable {
     return new FileGdbEnumRowsIterator(this, rows);
   }
 
-  default void setLoadOnlyMode(final boolean loadOnly) {
-    final TableReference tableReference = getTableReference();
-    tableReference.setLoadOnlyMode(loadOnly);
-  }
-
   default void updateRecord(final Record record) {
-    final Object objectId = record.getValue("OBJECTID");
+    final TableReference tableReference = getTableReference();
+    final String oidFieldName = tableReference.getRecordDefinition().getOidFieldName();
+    final Object objectId = record.getValue(oidFieldName);
     if (objectId == null) {
       insertRecord(record);
     } else if (record.getState() == RecordState.MODIFIED) {
-      final TableReference tableReference = getTableReference();
       tableReference.updateRecordRow(record);
     }
   }
