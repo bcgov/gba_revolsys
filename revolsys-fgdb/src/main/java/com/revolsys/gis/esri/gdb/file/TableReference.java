@@ -122,8 +122,9 @@ class TableReference extends CloseableValueHolder<Table> {
     final Integer objectId = record.getInteger(oidFieldName);
     if (objectId != null) {
       final String whereClause = oidFieldName + "=" + objectId;
-      // Methods synchronized on this table must not be called while synchronized
-      // on the geodatabase, as other threads lock the table then the geodatabase.
+      // Methods synchronized on this table must not be called while
+      // synchronized on the geodatabase, as other threads lock the table then
+      // the geodatabase.
       try (
         BaseCloseable lock = writeLock(false)) {
         final Table table = getValue();
@@ -205,8 +206,16 @@ class TableReference extends CloseableValueHolder<Table> {
   void insertRecord(final Record record) {
     final FileGdbRecordStore recordStore = getRecordStore();
     final RecordDefinition sourceRecordDefinition = record.getRecordDefinition();
-    final RecordDefinition recordDefinition = recordStore
-      .getRecordDefinition(sourceRecordDefinition);
+    // Use this table's definition rather than looking it up in the record store
+    // for each record, which locks the geodatabase. Records from this record
+    // store keep their own definition (it may be newer than this table's after
+    // a schema refresh) so the object id etc. are set on them after the insert.
+    final RecordDefinition recordDefinition;
+    if (sourceRecordDefinition.equalsRecordStore(recordStore)) {
+      recordDefinition = sourceRecordDefinition;
+    } else {
+      recordDefinition = this.recordDefinition;
+    }
 
     try {
       validateRequired(record);
@@ -308,7 +317,14 @@ class TableReference extends CloseableValueHolder<Table> {
   }
 
   synchronized void setLoadOnlyMode(final boolean loadOnly) {
-    // table.setLoadOnlyMode(loadOnly);
+    final Table table = getValue();
+    if (table != null) {
+      try {
+        table.setLoadOnlyMode(loadOnly);
+      } finally {
+        disconnect();
+      }
+    }
   }
 
   @Override
@@ -322,8 +338,9 @@ class TableReference extends CloseableValueHolder<Table> {
     if (objectId != null) {
       validateRequired(record);
       final String whereClause = oidFieldName + "=" + objectId;
-      // Methods synchronized on this table must not be called while synchronized
-      // on the geodatabase, as other threads lock the table then the geodatabase.
+      // Methods synchronized on this table must not be called while
+      // synchronized on the geodatabase, as other threads lock the table then
+      // the geodatabase.
       try (
         BaseCloseable lock = writeLock(false)) {
         final Table table = getValue();

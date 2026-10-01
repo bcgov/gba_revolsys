@@ -117,6 +117,8 @@ public class FileGdbRecordStore extends AbstractRecordStore {
 
   private boolean createAreaField = false;
 
+  private boolean loadOnlyMode = false;
+
   FileGdbRecordStore(final File file) {
     this.fileName = FileUtil.getCanonicalPath(file);
     setConnectionProperties(JsonObject.hash("url", FileUtil.toUrl(file).toString()));
@@ -684,6 +686,10 @@ public class FileGdbRecordStore extends AbstractRecordStore {
     return this.exists && !isClosed();
   }
 
+  public boolean isLoadOnlyMode() {
+    return this.loadOnlyMode;
+  }
+
   private FileGdbDomainCodeTable loadDomain(final String domainName, final String domainDef) {
     final Domain domain = EsriGdbXmlParser.parse(domainDef);
     if (domain != null) {
@@ -860,7 +866,7 @@ public class FileGdbRecordStore extends AbstractRecordStore {
 
   @Override
   public FileGdbWriter newRecordWriter(final RecordDefinitionProxy recordDefinition) {
-    return newRecordWriter(recordDefinition, false);
+    return newRecordWriter(recordDefinition, this.loadOnlyMode);
   }
 
   // TODO deadlocks!!!!!!!!
@@ -1090,6 +1096,20 @@ public class FileGdbRecordStore extends AbstractRecordStore {
 
   public void setFileName(final String fileName) {
     this.fileName = fileName;
+  }
+
+  /**
+   * Set the default load only mode for record writers that don't specify it.
+   * In load only mode ESRI doesn't update the spatial and attribute indexes as
+   * each row is inserted; they are rebuilt when the writer is closed. This is
+   * much faster for bulk loads (e.g. exports to a new geodatabase), but slower
+   * for small edits to large tables, and searches on the table (particularly
+   * spatial searches) may be incomplete until the writer is closed.
+   *
+   * @param loadOnlyMode True if writers should use load only mode.
+   */
+  public void setLoadOnlyMode(final boolean loadOnlyMode) {
+    this.loadOnlyMode = loadOnlyMode;
   }
 
   protected PathName toPath(final String catalogPath) {
