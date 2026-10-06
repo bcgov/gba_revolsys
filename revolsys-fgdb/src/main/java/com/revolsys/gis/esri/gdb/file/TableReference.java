@@ -13,7 +13,6 @@ import com.revolsys.esri.filegdb.jni.Row;
 import com.revolsys.esri.filegdb.jni.Table;
 import com.revolsys.gis.esri.gdb.file.capi.type.AbstractFileGdbFieldDefinition;
 import com.revolsys.io.BaseCloseable;
-import com.revolsys.jdbc.JdbcUtils;
 import com.revolsys.record.Record;
 import com.revolsys.record.RecordState;
 import com.revolsys.record.schema.FieldDefinition;
@@ -93,8 +92,6 @@ class TableReference extends CloseableValueHolder<Table> {
 
   private final FileGdbRecordDefinition recordDefinition;
 
-  private final String tableName;
-
   TableReference(final FileGdbRecordStore recordStore,
     final FileGdbRecordDefinition recordDefinition, final GeodatabaseReference geodatabase,
     final PathName pathName, final String catalogPath) {
@@ -103,7 +100,6 @@ class TableReference extends CloseableValueHolder<Table> {
     this.geodatabase = geodatabase;
     this.pathName = pathName;
     this.catalogPath = catalogPath;
-    this.tableName = JdbcUtils.getQualifiedTableName(this.recordDefinition.getPath());
   }
 
   void closeRowsDo(final EnumRows rows) {
@@ -122,18 +118,43 @@ class TableReference extends CloseableValueHolder<Table> {
   }
 
   boolean deleteRecordRow(final Record record) {
-    final Integer objectId = record.getInteger("OBJECTID");
+    final String oidFieldName = this.recordDefinition.getOidFieldName();
+    final Integer objectId = record.getInteger(oidFieldName);
     if (objectId != null) {
-      synchronized (this.geodatabase) {
-        try (
-          BaseCloseable lock = writeLock(false)) {
-          final String deleteSql = "DELETE FROM " + this.tableName + " WHERE OBJECTID=" + objectId;
-          final EnumRows rows = query(deleteSql, true);
-          closeRowsDo(rows);
-
-          record.setState(RecordState.DELETED);
-          this.recordStore.addStatistic("Delete", record);
-          return true;
+      final String whereClause = oidFieldName + "=" + objectId;
+      // Methods synchronized on this table must not be called while
+      // synchronized on the geodatabase, as other threads lock the table then
+      // the geodatabase.
+      try (
+        BaseCloseable lock = writeLock(false)) {
+        final Table table = getValue();
+        if (table != null) {
+          boolean deleted = false;
+          try {
+            synchronized (this.geodatabase) {
+              final EnumRows rows = table.search("*", whereClause, false);
+              try {
+                final Row row = rows.next();
+                if (row != null) {
+                  try {
+                    table.deleteRow(row);
+                    deleted = true;
+                  } finally {
+                    row.delete();
+                  }
+                }
+              } finally {
+                closeRowsDo(rows);
+              }
+            }
+          } finally {
+            disconnect();
+          }
+          if (deleted) {
+            record.setState(RecordState.DELETED);
+            this.recordStore.addStatistic("Delete", record);
+            return true;
+          }
         }
       }
     }
@@ -185,8 +206,16 @@ class TableReference extends CloseableValueHolder<Table> {
   void insertRecord(final Record record) {
     final FileGdbRecordStore recordStore = getRecordStore();
     final RecordDefinition sourceRecordDefinition = record.getRecordDefinition();
-    final RecordDefinition recordDefinition = recordStore
-      .getRecordDefinition(sourceRecordDefinition);
+    // Use this table's definition rather than looking it up in the record store
+    // for each record, which locks the geodatabase. Records from this record
+    // store keep their own definition (it may be newer than this table's after
+    // a schema refresh) so the object id etc. are set on them after the insert.
+    final RecordDefinition recordDefinition;
+    if (sourceRecordDefinition.equalsRecordStore(recordStore)) {
+      recordDefinition = sourceRecordDefinition;
+    } else {
+      recordDefinition = this.recordDefinition;
+    }
 
     try {
       validateRequired(record);
@@ -212,6 +241,7 @@ class TableReference extends CloseableValueHolder<Table> {
             synchronized (this.geodatabase) {
               table.insertRow(row);
             }
+            recordStore.addStatistic("Insert", record);
             if (sourceRecordDefinition == recordDefinition) {
               record.setState(RecordState.INITIALIZING);
               try {
@@ -231,7 +261,6 @@ class TableReference extends CloseableValueHolder<Table> {
             synchronized (this) {
               row.delete();
             }
-            recordStore.addStatistic("Insert", record);
           }
         } finally {
           disconnect();
@@ -249,7 +278,7 @@ class TableReference extends CloseableValueHolder<Table> {
   }
 
   synchronized boolean isLocked() {
-    return this.lockCount >= 0;
+    return this.lockCount > 0;
   }
 
   @Override
@@ -287,63 +316,68 @@ class TableReference extends CloseableValueHolder<Table> {
     return null;
   }
 
-  synchronized void setLoadOnlyMode(final boolean loadOnly) {
-    // table.setLoadOnlyMode(loadOnly);
-  }
-
   @Override
   public String toString() {
     return this.recordStore.getFileName() + "\t" + this.catalogPath;
   }
 
   boolean updateRecordRow(final Record record) {
-    final Integer objectId = record.getInteger("OBJECTID");
+    final String oidFieldName = this.recordDefinition.getOidFieldName();
+    final Integer objectId = record.getInteger(oidFieldName);
     if (objectId != null) {
       validateRequired(record);
-      final String whereClause = "OBJECTID=" + objectId;
-      synchronized (this.geodatabase) {
+      final String whereClause = oidFieldName + "=" + objectId;
+      // Methods synchronized on this table must not be called while
+      // synchronized on the geodatabase, as other threads lock the table then
+      // the geodatabase.
+      try (
+        BaseCloseable lock = writeLock(false)) {
         final Table table = getValue();
-        try (
-          BaseCloseable lock = writeLock(false)) {
-          final EnumRows rows = table.search("*", whereClause, false);
+        if (table != null) {
+          boolean updated = false;
           try {
-            final Row row = rows.next();
-            if (row != null) {
+            synchronized (this.geodatabase) {
+              final EnumRows rows = table.search("*", whereClause, false);
               try {
-                for (final FieldDefinition field : this.recordDefinition.getFields()) {
-                  final String name = field.getName();
+                final Row row = rows.next();
+                if (row != null) {
                   try {
-                    final Object value = record.getValue(name);
-                    final AbstractFileGdbFieldDefinition esriField = (AbstractFileGdbFieldDefinition)field;
-                    esriField.setUpdateValue(record, row, value);
+                    for (final FieldDefinition field : this.recordDefinition.getFields()) {
+                      final String name = field.getName();
+                      try {
+                        final Object value = record.getValue(name);
+                        final AbstractFileGdbFieldDefinition esriField = (AbstractFileGdbFieldDefinition)field;
+                        esriField.setUpdateValue(record, row, value);
+                      } catch (final Throwable e) {
+                        throw new ObjectPropertyException(record, name, e);
+                      }
+                    }
+                    synchronized (table) {
+                      table.updateRow(row);
+                    }
+                  } catch (final ObjectException e) {
+                    if (e.getObject() == record) {
+                      throw e;
+                    } else {
+                      throw new ObjectException(record, e);
+                    }
                   } catch (final Throwable e) {
-                    throw new ObjectPropertyException(record, name, e);
+                    throw new ObjectException(record, e);
                   }
+                  row.delete();
+                  updated = true;
                 }
-                synchronized (table) {
-                  table.updateRow(row);
-                }
-                record.setState(RecordState.PERSISTED);
-              } catch (final ObjectException e) {
-                if (e.getObject() == record) {
-                  throw e;
-                } else {
-                  throw new ObjectException(record, e);
-                }
-              } catch (final Throwable e) {
-                throw new ObjectException(record, e);
+              } finally {
+                closeRowsDo(rows);
               }
-              row.delete();
-              this.recordStore.addStatistic("Update", record);
-
-              return true;
             }
           } finally {
-            try {
-              closeRowsDo(rows);
-            } finally {
-              disconnect();
-            }
+            disconnect();
+          }
+          if (updated) {
+            record.setState(RecordState.PERSISTED);
+            this.recordStore.addStatistic("Update", record);
+            return true;
           }
         }
       }
@@ -380,10 +414,22 @@ class TableReference extends CloseableValueHolder<Table> {
 
   @Override
   protected Table valueNew() {
-    // System.out.println("CO\tg\t" + this.geodatabase);
-    this.geodatabaseClosable = this.geodatabase.connect();
-    // System.out.println("OP\tt\t" + this);
-    return this.geodatabase.openTable(this.catalogPath);
+    // The connection keeps the geodatabase open while the table is open. It is
+    // released in valueClose, which is only called if a table was returned, so
+    // release it here if the table couldn't be opened.
+    final BaseCloseable connection = this.geodatabase.connect();
+    try {
+      final Table table = this.geodatabase.openTable(this.catalogPath);
+      if (table != null) {
+        this.geodatabaseClosable = connection;
+        return table;
+      }
+    } catch (final RuntimeException | Error e) {
+      connection.close();
+      throw e;
+    }
+    connection.close();
+    return null;
   }
 
   void withTableLock(final Runnable action) {

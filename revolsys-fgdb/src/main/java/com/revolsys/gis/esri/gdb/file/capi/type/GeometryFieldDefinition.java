@@ -104,9 +104,21 @@ public class GeometryFieldDefinition extends AbstractFileGdbFieldDefinition {
 
   @Override
   public Object getValue(final Row row) {
+    return getValue(row, this.fieldNumber);
+  }
+
+  /**
+   * Get the geometry from a row whose columns are not in table order (e.g. the
+   * result of a SELECT on a subset of the fields).
+   *
+   * @param row The row.
+   * @param fieldIndex The index of the geometry field within the row.
+   * @return The geometry.
+   */
+  public Geometry getValue(final Row row, final int fieldIndex) {
     final byte[] bytes;
     synchronized (row) {
-      if (row.isNull(this.fieldNumber)) {
+      if (row.isNull(fieldIndex)) {
         return null;
       } else {
         bytes = row.getGeometry();

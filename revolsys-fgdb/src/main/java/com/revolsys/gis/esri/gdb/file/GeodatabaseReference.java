@@ -1,5 +1,7 @@
 package com.revolsys.gis.esri.gdb.file;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.jeometry.common.logging.Logs;
 
 import com.revolsys.esri.filegdb.jni.EnumRows;
@@ -12,8 +14,6 @@ import com.revolsys.record.io.format.esri.gdb.xml.model.Domain;
 import com.revolsys.record.io.format.esri.gdb.xml.model.EsriGdbXmlSerializer;
 
 public class GeodatabaseReference {
-
-  private final BaseCloseable closeable = newCloseable();
 
   private int referenceCount = 0;
 
@@ -76,12 +76,26 @@ public class GeodatabaseReference {
     }
   }
 
+  /**
+   * Keep the geodatabase open until the returned connection is closed. Each
+   * connection releases its reference at most once, even if closed repeatedly.
+   *
+   * @return The connection.
+   */
   public synchronized BaseCloseable connect() {
     if (isClosed()) {
       throw new IllegalStateException("Resource closed");
+    } else if (getValue() == null) {
+      // No reference was taken, so there is nothing to release
+      return () -> {
+      };
     } else {
-      getValue();
-      return this.closeable;
+      final AtomicBoolean open = new AtomicBoolean(true);
+      return () -> {
+        if (open.compareAndSet(true, false)) {
+          disconnect();
+        }
+      };
     }
   }
 
@@ -193,7 +207,6 @@ public class GeodatabaseReference {
     if (isClosed()) {
       throw new IllegalStateException("Value closed");
     } else {
-      this.referenceCount++;
       if (this.geodatabase == null && this.fileName != null) {
         try {
           // System.out.println("OP\tg\t" + this);
@@ -205,8 +218,10 @@ public class GeodatabaseReference {
           }
         }
       }
-      if (this.geodatabase == null) {
-        this.referenceCount = 0;
+      // Only count a reference once the geodatabase is open, so a failed open
+      // doesn't leave a reference that is never released
+      if (this.geodatabase != null) {
+        this.referenceCount++;
       }
       return this.geodatabase;
     }
@@ -286,10 +301,6 @@ public class GeodatabaseReference {
       }
       return pathExists;
     }
-  }
-
-  protected BaseCloseable newCloseable() {
-    return this::disconnect;
   }
 
   public synchronized Table openTable(final String path) {

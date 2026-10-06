@@ -46,13 +46,16 @@ public class FileGdbRecordStoreFactory implements FileRecordStoreFactory {
     } else {
       synchronized (COUNTS) {
         final String fileName = FileUtil.getCanonicalPath(file);
-        final AtomicInteger count = Maps.get(COUNTS, fileName, new AtomicInteger());
-        count.incrementAndGet();
         FileGdbRecordStore recordStore = RECORD_STORES.get(fileName);
         if (recordStore == null || recordStore.isClosed()) {
           recordStore = new FileGdbRecordStore(file);
           RECORD_STORES.put(fileName, recordStore);
+          // Reset the count as references to a previous record store that was
+          // closed without being released (e.g. failed to initialize) are
+          // never released against the new record store.
+          COUNTS.put(fileName, new AtomicInteger());
         }
+        COUNTS.get(fileName).incrementAndGet();
         return recordStore;
       }
     }

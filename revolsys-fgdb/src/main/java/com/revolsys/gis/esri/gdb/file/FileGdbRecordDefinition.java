@@ -36,6 +36,7 @@ import com.revolsys.record.io.format.esri.gdb.xml.model.Field;
 import com.revolsys.record.io.format.esri.gdb.xml.model.Index;
 import com.revolsys.record.io.format.esri.gdb.xml.model.enums.FieldType;
 import com.revolsys.record.io.format.xml.XmlProcessor;
+import com.revolsys.record.property.AreaFieldName;
 import com.revolsys.record.property.LengthFieldName;
 import com.revolsys.record.query.Query;
 import com.revolsys.record.schema.RecordDefinitionImpl;
@@ -101,7 +102,7 @@ public class FileGdbRecordDefinition extends RecordDefinitionImpl {
       lengthFieldNameProperty.setRecordDefinition(this);
 
       areaFieldName = featureClass.getAreaFieldName();
-      final LengthFieldName areaFieldNameProperty = new LengthFieldName(areaFieldName);
+      final AreaFieldName areaFieldNameProperty = new AreaFieldName(areaFieldName);
       areaFieldNameProperty.setRecordDefinition(this);
 
     }
@@ -155,7 +156,7 @@ public class FileGdbRecordDefinition extends RecordDefinitionImpl {
                 final Object max = fieldDefinition.toFieldValueException(maxValue);
                 fieldDefinition.setMaxValue(max);
               } catch (final Exception e) {
-                Logs.error(this, "Invalid domain minValue=" + maxValue);
+                Logs.error(this, "Invalid domain maxValue=" + maxValue);
               }
             }
           }
@@ -216,6 +217,16 @@ public class FileGdbRecordDefinition extends RecordDefinitionImpl {
 
   public String getCatalogPath() {
     return this.catalogPath;
+  }
+
+  /**
+   * Get the name of the ESRI object id field. This is usually OBJECTID but may
+   * be different (e.g. OBJECTID_1 if the source data had an OBJECTID field).
+   *
+   * @return The object id field name.
+   */
+  public String getOidFieldName() {
+    return this.deTable.getOIDFieldName();
   }
 
   @SuppressWarnings("unchecked")

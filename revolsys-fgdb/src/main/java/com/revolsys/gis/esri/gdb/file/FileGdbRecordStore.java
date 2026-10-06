@@ -117,6 +117,8 @@ public class FileGdbRecordStore extends AbstractRecordStore {
 
   private boolean createAreaField = false;
 
+  private boolean loadOnlyMode = false;
+
   FileGdbRecordStore(final File file) {
     this.fileName = FileUtil.getCanonicalPath(file);
     setConnectionProperties(JsonObject.hash("url", FileUtil.toUrl(file).toString()));
@@ -226,7 +228,7 @@ public class FileGdbRecordStore extends AbstractRecordStore {
           }
           final Object argument = parameters.get(i);
           final StringBuilder replacement = new StringBuilder();
-          matcher.appendReplacement(replacement, DataTypes.toString(argument));
+          matcher.appendReplacement(replacement, "");
           sql.append(replacement);
           appendValue(sql, argument);
           i++;
@@ -283,6 +285,15 @@ public class FileGdbRecordStore extends AbstractRecordStore {
     }
   }
 
+  // Known deadlock risk: this holds the geodatabase lock while closing the
+  // writer and tables, which lock each TableReference. Other threads lock a
+  // TableReference then the geodatabase (e.g. reading rows, releasing a
+  // connection), so closing the record store while another thread is still
+  // using one of its tables can deadlock. Closing tables outside the
+  // geodatabase lock would avoid this, but the record store must not be closed
+  // while in use regardless: open iterators or writers on other threads may
+  // still reference native objects that are freed here. GBA exports close all
+  // writers before closing the record store, so they are not affected.
   public void closeDo() {
     this.exists = false;
     synchronized (this.geodatabase) {
@@ -403,7 +414,9 @@ public class FileGdbRecordStore extends AbstractRecordStore {
           return table.getRecordCount();
         } else {
           final StringBuilder sql = new StringBuilder();
-          sql.append("SELECT OBJECTID FROM ");
+          sql.append("SELECT ");
+          sql.append(table.getRecordDefinition().getOidFieldName());
+          sql.append(" FROM ");
           sql.append(JdbcUtils.getTableName(typePath.toString()));
           if (whereClause.length() > 0) {
             sql.append(" WHERE ");
@@ -422,7 +435,8 @@ public class FileGdbRecordStore extends AbstractRecordStore {
           }
         }
       } else {
-        final GeometryFieldDefinition geometryField = (GeometryFieldDefinition)recordDefinition
+        final GeometryFieldDefinition geometryField = (GeometryFieldDefinition)table
+          .getRecordDefinition()
           .getGeometryField();
         if (geometryField == null || boundingBox.isEmpty()) {
           return 0;
@@ -440,7 +454,8 @@ public class FileGdbRecordStore extends AbstractRecordStore {
             final FileGdbEnumRowsIterator rows = tableWrapper.query(sql.toString(), false)) {
             int count = 0;
             for (final Row row : rows) {
-              final Geometry geometry = (Geometry)geometryField.getValue(row);
+              // The geometry is the only column selected so it is at index 0
+              final Geometry geometry = geometryField.getValue(row, 0);
               if (geometry != null) {
                 final BoundingBox geometryBoundingBox = geometry.getBoundingBox();
                 if (geometryBoundingBox.bboxIntersects(boundingBox)) {
@@ -455,6 +470,15 @@ public class FileGdbRecordStore extends AbstractRecordStore {
     }
   }
 
+  // Known deadlock risk: this holds the geodatabase lock while looking up the
+  // schema, which can lock the record store (uncached paths) and the schema
+  // (loading a schema that isn't initialized). Schema loading takes those
+  // locks in the opposite order (record store -> schema -> geodatabase, see
+  // refreshSchemaElements), so creating a table while another thread loads a
+  // schema for the first time can deadlock. newSchema and newRecordWriter have
+  // the same problem. New geodatabases are not affected as their schemas are
+  // created initialized and never lazily loaded (e.g. GBA exports); existing
+  // geodatabases load the root schema and each feature dataset on first access.
   @SuppressWarnings("unchecked")
   @Override
   public <RD extends RecordDefinition> RD getRecordDefinition(
@@ -620,7 +644,7 @@ public class FileGdbRecordStore extends AbstractRecordStore {
         final VectorOfWString domainNames = geodatabase.getDomains();
         for (int i = 0; i < domainNames.size(); i++) {
           final String domainName = domainNames.get(i);
-          final String domainDef = this.geodatabase.getDomainDefinition(domainName);
+          final String domainDef = geodatabase.getDomainDefinition(domainName);
           loadDomain(domainName, domainDef);
         }
         exists = true;
@@ -660,6 +684,10 @@ public class FileGdbRecordStore extends AbstractRecordStore {
 
   public boolean isExists() {
     return this.exists && !isClosed();
+  }
+
+  public boolean isLoadOnlyMode() {
+    return this.loadOnlyMode;
   }
 
   private FileGdbDomainCodeTable loadDomain(final String domainName, final String domainDef) {
@@ -723,7 +751,9 @@ public class FileGdbRecordStore extends AbstractRecordStore {
       sql = whereClause;
     } else {
       sql.append("SELECT ");
-      query.appendSelect(sql);
+      // Fields are read by their index in the full table, so all fields must be
+      // selected in table order even if the query has a select list.
+      fileGdbRecordDefinition.appendSelectAll(query, sql);
       sql.append(" FROM ");
       sql.append(JdbcUtils.getTableName(catalogPath));
       if (whereClause.length() > 0) {
@@ -737,7 +767,8 @@ public class FileGdbRecordStore extends AbstractRecordStore {
         if (field instanceof ColumnReference) {
           final ColumnReference column = (ColumnReference)field;
           final String fieldName = column.getAliasName();
-          if (order.isAscending() && fieldName.toString().equals("OBJECTID")) {
+          if (order.isAscending()
+            && fieldName.equals(fileGdbRecordDefinition.getOidFieldName())) {
             useOrderBy = false;
           }
         }
@@ -786,14 +817,14 @@ public class FileGdbRecordStore extends AbstractRecordStore {
   @Override
   public Identifier newPrimaryIdentifier(final PathName typePath) {
     synchronized (this.idGenerators) {
-      final RecordDefinition recordDefinition = getRecordDefinition(typePath);
+      final FileGdbRecordDefinition recordDefinition = getRecordDefinition(typePath);
       if (recordDefinition == null) {
         return null;
       } else {
         final String idFieldName = recordDefinition.getIdFieldName();
         if (idFieldName == null) {
           return null;
-        } else if (!idFieldName.equals("OBJECTID")) {
+        } else if (!idFieldName.equals(recordDefinition.getOidFieldName())) {
           AtomicLong idGenerator = this.idGenerators.get(typePath);
           if (idGenerator == null) {
             long maxId = 0;
@@ -835,7 +866,7 @@ public class FileGdbRecordStore extends AbstractRecordStore {
 
   @Override
   public FileGdbWriter newRecordWriter(final RecordDefinitionProxy recordDefinition) {
-    return newRecordWriter(recordDefinition, false);
+    return newRecordWriter(recordDefinition, this.loadOnlyMode);
   }
 
   // TODO deadlocks!!!!!!!!
@@ -868,6 +899,7 @@ public class FileGdbRecordStore extends AbstractRecordStore {
     return new FileGdbRecordStoreSchema(this);
   }
 
+  // See the deadlock note on getRecordDefinition(RecordDefinition).
   private FileGdbRecordStoreSchema newSchema(final PathName schemaPath,
     final SpatialReference spatialReference) {
     synchronized (this.geodatabase) {
@@ -963,6 +995,10 @@ public class FileGdbRecordStore extends AbstractRecordStore {
     }
   }
 
+  // Called with the schema locked, then locks the geodatabase. Looking up a child
+  // schema that isn't cached locks the record store, and refreshing an
+  // initialized child schema locks it. See the deadlock note on
+  // getRecordDefinition(RecordDefinition).
   @Override
   protected Map<PathName, ? extends RecordStoreSchemaElement> refreshSchemaElements(
     final RecordStoreSchema schema) {
@@ -1060,6 +1096,20 @@ public class FileGdbRecordStore extends AbstractRecordStore {
 
   public void setFileName(final String fileName) {
     this.fileName = fileName;
+  }
+
+  /**
+   * Set the default load only mode for record writers that don't specify it.
+   * In load only mode ESRI doesn't update the spatial and attribute indexes as
+   * each row is inserted; they are rebuilt when the writer is closed. This is
+   * much faster for bulk loads (e.g. exports to a new geodatabase), but slower
+   * for small edits to large tables, and searches on the table (particularly
+   * spatial searches) may be incomplete until the writer is closed.
+   *
+   * @param loadOnlyMode True if writers should use load only mode.
+   */
+  public void setLoadOnlyMode(final boolean loadOnlyMode) {
+    this.loadOnlyMode = loadOnlyMode;
   }
 
   protected PathName toPath(final String catalogPath) {
