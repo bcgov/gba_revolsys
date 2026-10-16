@@ -49,7 +49,12 @@ public class TextStyle extends BaseObjectWithPropertiesAndChange
 
   private static final Map<String, Object> DEFAULT_VALUES = new TreeMap<>();
 
-  private static final Pattern FIELD_PATTERN = Pattern.compile("\\[([\\w.]+)\\]");
+  /**
+   * The <code>[FIELD]</code> tokens in a {@link #getTextName() textName} label. Public so
+   * that code which analyses or rewrites a saved style reads the field references the same
+   * way {@link #getLabel(com.revolsys.record.Record)} resolves them.
+   */
+  public static final Pattern FIELD_PATTERN = Pattern.compile("\\[([\\w.]+)\\]");
 
   private static final Set<String> PROPERTY_NAMES = new HashSet<>();
 
